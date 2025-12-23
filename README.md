@@ -1,9 +1,9 @@
 # Smart House
 
 ## Authors
-Tamara Cvjetković SV48/2022
-
 Veselin Roganović SV36/2022
+
+Tamara Cvjetković SV48/2022
 
 ## Short description
 University IoT smart house project developed for Raspberry Pi.

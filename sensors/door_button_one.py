@@ -1,9 +1,12 @@
 import time
 import RPi.GPIO as GPIO
 
+from colors import print_gray
+
+
 def button_pressed(channel, callback):
     callback()
-    print("Door Number One - Opened")
+    print_gray("Door Number One - Opened")
 
 def run_door_button_one_loop(pin, callback, stop_event):
     GPIO.setmode(GPIO.BCM)

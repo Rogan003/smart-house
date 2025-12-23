@@ -1,9 +1,12 @@
 import time
 import random
 
+from colors import print_gray
+
+
 def generate_value():
     if random.randint(0, 100) <= 15:
-        print("Door Number One - Opened")
+        print_gray("Door Number One - Opened")
 
 def run_door_button_one_simulator(delay, callback, stop_event):
     while True:
