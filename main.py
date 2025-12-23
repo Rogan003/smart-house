@@ -3,6 +3,7 @@ import threading
 from components.door_button_one import run_door_button_one
 from components.door_buzzer_one import run_door_buzzer_one
 from components.door_led_light import run_door_led_lights
+from components.door_motion_sensor import run_door_motion_sensor_one
 
 from settings import load_settings
 import time
@@ -40,8 +41,11 @@ if __name__ == "__main__":
     stop_event = threading.Event()
 
     try:
-        door_button_one_settings = settings['door_button_one']
-        run_door_button_one(door_button_one_settings, threads, stop_event)
+        door_motion_sensor_one_settings = settings['door_button_one']
+        run_door_button_one(door_motion_sensor_one_settings, threads, stop_event)
+
+        door_motion_sensor_one_settings = settings['door_motion_sensor_one']
+        run_door_motion_sensor_one(door_motion_sensor_one_settings, threads, stop_event)
 
         menu(settings, threads, stop_event)
 

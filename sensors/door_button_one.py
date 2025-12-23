@@ -9,7 +9,6 @@ def button_pressed(channel, callback):
     print_gray("Door Number One - Opened")
 
 def run_door_button_one_loop(pin, callback, stop_event):
-    GPIO.setmode(GPIO.BCM)
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     GPIO.add_event_detect(
