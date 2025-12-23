@@ -1,6 +1,7 @@
 import threading
 
 from components.door_button_one import run_door_button_one
+from components.door_buzzer_one import run_door_buzzer_one
 from components.door_led_light import run_door_led_lights
 
 from settings import load_settings
@@ -26,6 +27,9 @@ if __name__ == "__main__":
 
         door_led_light_settings = settings['door_led_light']
         run_door_led_lights(door_led_light_settings, threads, stop_event)
+
+        door_buzzer_one_settings = settings['door_buzzer']
+        run_door_buzzer_one(door_buzzer_one_settings, threads, stop_event)
 
         while True:
             time.sleep(1)
