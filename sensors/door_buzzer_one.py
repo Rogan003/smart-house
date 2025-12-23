@@ -17,10 +17,7 @@ def buzz(pin, callback):
 
 def run_door_buzzer_one_loop(pin, callback, stop_event):
     GPIO.setup(pin, GPIO.OUT)
-    while True:
-        if input("Enter DB for door buzzer one") == "DB":
-            buzz(pin, callback)
+    buzz(pin, callback)
 
-        if stop_event.is_set():
-            GPIO.cleanup()
-            break
+    if stop_event.is_set():
+        GPIO.cleanup()
