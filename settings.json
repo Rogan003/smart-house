@@ -1,0 +1,6 @@
+{
+    "door_button_one": {
+        "simulated": true,
+        "pin": 17
+    } 
+}
