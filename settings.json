@@ -6,7 +6,7 @@
     },
     "door_led_light": {
         "simulated": true,
-        "pin": 27,
+        "pin": 18,
         "value": "DL"
     },
     "door_ultrasonic_sensor_one": {

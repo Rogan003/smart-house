@@ -1,42 +1,26 @@
-from colors import print_gray, print_yellow
-
 import threading
 import time
 
-#import RPi.GPIO as GPIO
+from colors import print_gray
+
+from simulators.door_led_light import run_door_led_light_simulator
 
 
-turned_on = False
+def door_led_light_callback():
+    t = time.localtime()
+    print_gray("="*20)
+    print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
-def turn_diode_on(settings):
-    global turned_on
 
+def run_door_led_lights(settings, threads, stop_event):
     if settings['simulated']:
-        turned_on = True
-        print_yellow("Door Light ON")
+        print_gray("Starting door LED light simulator")
+        door_led_light_thread = threading.Thread(target = run_door_led_light_simulator, args=(door_led_light_callback,))
+        door_led_light_thread.start()
+        threads.append(door_led_light_thread)
     else:
-        #GPIO.output(settings['pin'], GPIO.HIGH)
-        pass
-
-def turn_diode_off(settings):
-    global turned_on
-
-    if settings['simulated']:
-        turned_on = False
-        print_yellow("Door Light OFF")
-    else:
-        #GPIO.output(settings['pin'], GPIO.LOW)
-        pass
-
-
-def run_door_led_lights(settings, threads, stop_event, turn_on=None):
-    if settings['simulated']:
-        if turned_on:
-            turn_diode_off(settings)
-        else:
-            turn_diode_on(settings)
-
-    else:
-        #GPIO.setmode(GPIO.BCM)
-        #GPIO.setup(settings['pin'], GPIO.OUT)
-        pass
+        from sensors.door_led_light import run_door_led_light_loop
+        print_gray("Starting door LED light loop")
+        door_led_light_thread = threading.Thread(target=run_door_led_light_loop, args=(settings["pin"], door_led_light_callback, stop_event))
+        door_led_light_thread.start()
+        threads.append(door_led_light_thread)
