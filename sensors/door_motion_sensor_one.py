@@ -1,14 +1,14 @@
+import RPi.GPIO as GPIO
 import time
 
-import RPi.GPIO as GPIO
 
 def motion_detected(channel, callback):
     callback()
-    print("Door number 1 moving detected")
+    print("[Door 1] - Moving detected")
 
 def no_motion(channel, callback):
     callback()
-    print("Door number 1 moving stopped")
+    print("[Door 1] - Moving stopped")
 
 def run_door_motion_sensor_one_loop(pin, callback, stop_event):
     GPIO.setup(pin, GPIO.IN)

@@ -1,6 +1,5 @@
-import time
-
 import RPi.GPIO as GPIO
+import time
 
 
 def get_distance(pin_trig, pin_echo):

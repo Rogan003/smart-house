@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
+
 def toggle(pin, callback):
     callback()
     GPIO.output(pin, GPIO.HIGH)

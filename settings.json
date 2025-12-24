@@ -27,6 +27,7 @@
     },
     "door_membrane_switch": {
         "simulated": true,
+        "pins": [25, 8, 7, 1, 12, 16, 20, 21],
         "value": "DMS"
     }
 }

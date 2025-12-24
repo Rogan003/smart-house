@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
+
 def buzz(pin, callback):
     pitch = 440
     duration = 0.1

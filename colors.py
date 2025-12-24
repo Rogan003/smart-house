@@ -5,6 +5,8 @@ class Colors:
     BLUE = '\033[94m'
     MAGENTA = '\033[95m'
     CYAN = '\033[96m'
+    BROWN = '\033[33m'
+    WHITE = '\033[97m'
     GRAY = '\033[37m'
     RESET = '\033[0m' # reset color
 
@@ -22,6 +24,12 @@ def print_blue(text):
 
 def print_magenta(text):
     print(Colors.MAGENTA + text + Colors.RESET)
+
+def print_brown(text):
+    print(Colors.BROWN + text + Colors.RESET)
+
+def print_white(text):
+    print(Colors.WHITE + text + Colors.RESET)
 
 def print_gray(text):
     print(Colors.GRAY + text + Colors.RESET)

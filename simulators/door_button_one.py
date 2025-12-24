@@ -1,13 +1,13 @@
 import time
 import random
 
-from colors import print_gray
+from colors import print_white
 
 
 def generate_value(callback):
     if random.randint(0, 100) <= 15:
         callback()
-        print_gray("Door Number One - Opened")
+        print_white("[Door 1] - Door opened")
 
 def run_door_button_one_simulator(delay, callback, stop_event):
     while True:
