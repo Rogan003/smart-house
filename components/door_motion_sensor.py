@@ -1,4 +1,3 @@
-from simulators.door_button_one import run_door_button_one_simulator
 from colors import print_gray
 
 import threading
