@@ -1,12 +1,12 @@
 import RPi.GPIO as GPIO
 import time
 
-from colors import print_white
+from colors import print_green
 
 
 def button_pressed(channel, callback):
     callback()
-    print_white("[Door 1] - Door opened")
+    print_green("[Door 1] - Door opened")
 
 def run_door_button_one_loop(pin, callback, stop_event):
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)

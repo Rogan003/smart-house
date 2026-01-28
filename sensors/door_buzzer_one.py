@@ -1,8 +1,9 @@
 import RPi.GPIO as GPIO
 import time
-
+from colors import print_blue
 
 def buzz(pin, callback):
+    print_blue("[Door 1] - Buzzer Buzzing")
     pitch = 440
     duration = 0.1
     callback()

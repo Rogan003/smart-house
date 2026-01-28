@@ -9,16 +9,16 @@
         "pin": 18,
         "value": "DL"
     },
+     "door_buzzer": {
+        "simulated": true,
+        "pin": 22,
+        "value": "DB"
+    },
     "door_ultrasonic_sensor_one": {
         "simulated": true,
         "pin_trig": 23,
         "pin_echo": 24,
         "value": "DUS1"
-    },
-    "door_buzzer": {
-        "simulated": true,
-        "pin": 22,
-        "value": "DB"
     },
     "door_motion_sensor_one": {
         "simulated": true,
