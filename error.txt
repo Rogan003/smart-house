@@ -1,0 +1,9 @@
+Enter command: /home/student/tamara/smart-house/sensors/door_led_light.py:22: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+  GPIO.setup(pin, GPIO.OUT)
+
+
+
+  power ide na 5v
+  GND na ground
+
+  High/Low - 
