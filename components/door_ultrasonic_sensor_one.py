@@ -42,7 +42,7 @@ def door_ultrasonic_sensor_one_callback(distance, settings):
     print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}, Distance: {distance} cm")
 
     ultrasonic_payload = {
-        "measurement": "Distance",
+        "measurement": "Door Distance Sensor 1",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],
@@ -50,7 +50,7 @@ def door_ultrasonic_sensor_one_callback(distance, settings):
     }
 
     with counter_lock:
-        ultrasonic_batch.append(('Distance', json.dumps(ultrasonic_payload), 0, True))
+        ultrasonic_batch.append(('Door Distance Sensor 1', json.dumps(ultrasonic_payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

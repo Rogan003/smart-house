@@ -42,7 +42,7 @@ def door_led_light_callback(settings):
     print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     led_payload = {
-        "measurement": "LED",
+        "measurement": "Door LED 1",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],
@@ -50,7 +50,7 @@ def door_led_light_callback(settings):
     }
 
     with counter_lock:
-        led_batch.append(('LED', json.dumps(led_payload), 0, True))
+        led_batch.append(('Door LED 1', json.dumps(led_payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

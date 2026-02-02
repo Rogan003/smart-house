@@ -42,7 +42,7 @@ def door_buzzer_one_callback(settings):
     print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     buzzer_payload = {
-        "measurement": "Buzzer",
+        "measurement": "Door Buzzer 1",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],
@@ -50,7 +50,7 @@ def door_buzzer_one_callback(settings):
     }
 
     with counter_lock:
-        buzzer_batch.append(('Buzzer', json.dumps(buzzer_payload), 0, True))
+        buzzer_batch.append(('Door Buzzer 1', json.dumps(buzzer_payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

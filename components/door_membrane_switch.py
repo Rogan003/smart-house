@@ -42,7 +42,7 @@ def door_membrane_switch_callback(key, settings):
     print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}, Key '{key}' pressed")
 
     membrane_payload = {
-        "measurement": "Membrane Switch",
+        "measurement": "Door Membrane Switch",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],
@@ -50,7 +50,7 @@ def door_membrane_switch_callback(key, settings):
     }
 
     with counter_lock:
-        membrane_batch.append(('Membrane Switch', json.dumps(membrane_payload), 0, True))
+        membrane_batch.append(('Door Membrane Switch', json.dumps(membrane_payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

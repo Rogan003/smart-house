@@ -42,7 +42,7 @@ def door_motion_sensor_one_callback(settings, status):
     print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     motion_payload = {
-        "measurement": "Motion",
+        "measurement": "Door Motion Sensor 1",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],
@@ -50,7 +50,7 @@ def door_motion_sensor_one_callback(settings, status):
     }
 
     with counter_lock:
-        motion_batch.append(('Motion', json.dumps(motion_payload), 0, True))
+        motion_batch.append(('Door Motion Sensor 1', json.dumps(motion_payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

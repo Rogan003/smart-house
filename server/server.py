@@ -23,8 +23,12 @@ mqtt_client.connect(HOSTNAME, PORT, 60)
 mqtt_client.loop_start()
 
 def on_connect(client, userdata, flags, rc):
-    client.subscribe("Temperature")
-    client.subscribe("Humidity")
+    client.subscribe("Door Buttton 1")
+    client.subscribe("Door Buzzer 1")
+    client.subscribe("Door LED 1")
+    client.subscribe("Door Membrane Switch")
+    client.subscribe("Door Motion Sensor 1")
+    client.subscribe("Door Distance Sensor 1")
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = lambda client, userdata, msg: save_to_db(json.loads(msg.payload.decode('utf-8')))
@@ -68,21 +72,21 @@ def handle_influx_query(query):
         return jsonify({"status": "error", "message": str(e)})
 
 
-@app.route('/simple_query', methods=['GET'])
-def retrieve_simple_data():
-    query = f"""from(bucket: "{bucket}")
-    |> range(start: -10m)
-    |> filter(fn: (r) => r._measurement == "Humidity")"""
-    return handle_influx_query(query)
-
-
-@app.route('/aggregate_query', methods=['GET'])
-def retrieve_aggregate_data():
-    query = f"""from(bucket: "{bucket}")
-    |> range(start: -10m)
-    |> filter(fn: (r) => r._measurement == "Humidity")
-    |> mean()"""
-    return handle_influx_query(query)
+# @app.route('/simple_query', methods=['GET'])
+# def retrieve_simple_data():
+#     query = f"""from(bucket: "{bucket}")
+#     |> range(start: -10m)
+#     |> filter(fn: (r) => r._measurement == "Humidity")"""
+#     return handle_influx_query(query)
+#
+#
+# @app.route('/aggregate_query', methods=['GET'])
+# def retrieve_aggregate_data():
+#     query = f"""from(bucket: "{bucket}")
+#     |> range(start: -10m)
+#     |> filter(fn: (r) => r._measurement == "Humidity")
+#     |> mean()"""
+#     return handle_influx_query(query)
 
 
 if __name__ == '__main__':
