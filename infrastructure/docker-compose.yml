@@ -1,4 +1,3 @@
-version: "3.7"
 services:
 
   # mqtt5 eclipse-mosquitto
@@ -40,20 +39,20 @@ services:
       - '3000:3000'
     volumes:
       - grafana:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - influxdb
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
     networks:
       - iot-network
 
 # volumes for mapping data,config and log
 volumes:
-  config:
-  data:
-  log:
-  influxdb:
   grafana:
 
 networks:

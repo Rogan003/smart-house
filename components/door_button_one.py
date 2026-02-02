@@ -41,7 +41,7 @@ def door_button_one_callback(settings):
     print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     button_press_payload = {
-        "measurement": "Door button 1 press",
+        "measurement": "Door button 1",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],

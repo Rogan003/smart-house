@@ -80,13 +80,12 @@ def handle_influx_query(query):
 #     return handle_influx_query(query)
 #
 #
-# @app.route('/aggregate_query', methods=['GET'])
-# def retrieve_aggregate_data():
-#     query = f"""from(bucket: "{bucket}")
-#     |> range(start: -10m)
-#     |> filter(fn: (r) => r._measurement == "Humidity")
-#     |> mean()"""
-#     return handle_influx_query(query)
+@app.route('/aggregate_query', methods=['GET'])
+def retrieve_aggregate_data():
+    query = f"""from(bucket: "{bucket}")
+    |> range(start: -10m)
+    |> filter(fn: (r) => r.name == "Door Button 1")"""
+    return handle_influx_query(query)
 
 
 if __name__ == '__main__':
