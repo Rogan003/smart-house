@@ -111,7 +111,7 @@
         }
       ],
       "title": "Door Button 1",
-      "type": "timeseries"
+      "type": "table"
     },
     {
       "datasource": {
@@ -202,7 +202,7 @@
         }
       ],
       "title": "Door Buzzer 1",
-      "type": "timeseries"
+      "type": "table"
     },
     {
       "datasource": {
@@ -293,7 +293,7 @@
         }
       ],
       "title": "Door LED 1",
-      "type": "timeseries"
+      "type": "table"
     },
     {
       "datasource": {
@@ -384,7 +384,7 @@
         }
       ],
       "title": "Door Membrane Switch",
-      "type": "timeseries"
+      "type": "table"
     },
     {
       "datasource": {
@@ -475,7 +475,7 @@
         }
       ],
       "title": "Door Motion Sensor 1",
-      "type": "timeseries"
+      "type": "table"
     },
     {
       "datasource": {
