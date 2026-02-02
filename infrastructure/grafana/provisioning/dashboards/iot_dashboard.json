@@ -106,7 +106,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.name == \"Door Button 1\")\n  |> filter(fn: (r) => r._field == \"measurement\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DS1\")",
           "refId": "A"
         }
       ],
@@ -197,7 +197,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.name == \"Door Buzzer 1\")\n  |> filter(fn: (r) => r._field == \"measurement\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DB\")",
           "refId": "A"
         }
       ],
@@ -288,7 +288,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.name == \"Door LED 1\")\n  |> filter(fn: (r) => r._field == \"measurement\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DL\")",
           "refId": "A"
         }
       ],
@@ -379,7 +379,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.name == \"Door Membrane Switch\")\n  |> filter(fn: (r) => r._field == \"measurement\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DMS\")",
           "refId": "A"
         }
       ],
@@ -470,7 +470,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.name == \"Door Motion Sensor 1\")\n  |> filter(fn: (r) => r._field == \"measurement\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DPIR1\")",
           "refId": "A"
         }
       ],
@@ -561,7 +561,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r.name == \"Door Distance Sensor 1\")\n  |> filter(fn: (r) => r._field == \"measurement\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DUS1\")",
           "refId": "A"
         }
       ],
