@@ -2,17 +2,17 @@ import RPi.GPIO as GPIO
 import time
 
 
-def read_line(line, characters, col_pins, callback):
+def read_line(line, characters, col_pins, callback, settings):
     GPIO.output(line, GPIO.HIGH)
 
     if GPIO.input(col_pins[0]) == 1:
-        callback(characters[0])
+        callback(characters[0], settings)
     if GPIO.input(col_pins[1]) == 1:
-        callback(characters[1])
+        callback(characters[1], settings)
     if GPIO.input(col_pins[2]) == 1:
-        callback(characters[2])
+        callback(characters[2], settings)
     if GPIO.input(col_pins[3]) == 1:
-        callback(characters[3])
+        callback(characters[3], settings)
 
     GPIO.output(line, GPIO.LOW)
 
@@ -35,10 +35,10 @@ def run_door_membrane_switch_loop(settings, callback, stop_event):
 
     try:
         while True:
-            read_line(r1, ["1", "2", "3", "A"], col_pins, callback)
-            read_line(r2, ["4", "5", "6", "B"], col_pins, callback)
-            read_line(r3, ["7", "8", "9", "C"], col_pins, callback)
-            read_line(r4, ["*", "0", "#", "D"], col_pins, callback)
+            read_line(r1, ["1", "2", "3", "A"], col_pins, callback, settings)
+            read_line(r2, ["4", "5", "6", "B"], col_pins, callback, settings)
+            read_line(r3, ["7", "8", "9", "C"], col_pins, callback, settings)
+            read_line(r4, ["*", "0", "#", "D"], col_pins, callback, settings)
             time.sleep(0.2)
 
             if stop_event.is_set():

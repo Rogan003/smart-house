@@ -12,15 +12,16 @@ def turn_diode_off(pin):
     print_yellow("[Door 1] - Door Light OFF")
     GPIO.output(pin, GPIO.LOW)
 
-def toggle(pin, callback):
-    callback()
+def toggle(pin, callback, settings):
+    callback(settings)
     turn_diode_on(pin)
     time.sleep(1)
     turn_diode_off(pin)
 
-def run_door_led_light_loop(pin, callback, stop_event):
+def run_door_led_light_loop(settings, callback, stop_event):
+    pin = settings['pin']
     GPIO.setup(pin, GPIO.OUT)
-    toggle(pin, callback)
+    toggle(pin, callback, settings)
 
     if stop_event.is_set():
         GPIO.cleanup()

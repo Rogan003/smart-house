@@ -33,14 +33,16 @@ def get_distance(pin_trig, pin_echo):
     distance = (pulse_duration * 34300)/2
     return distance
 
-def run_door_ultrasonic_sensor_one_loop(pin_trig, pin_echo, delay, callback, stop_event):
+def run_door_ultrasonic_sensor_one_loop(settings, delay, callback, stop_event):
+    pin_trig = settings['pin_trig']
+    pin_echo = settings['pin_echo']
     GPIO.setup(pin_trig, GPIO.OUT)
     GPIO.setup(pin_echo, GPIO.IN)
 
     while True:
         distance = get_distance(pin_trig, pin_echo)
         if distance is not None:
-            callback(distance)
+            callback(distance, settings)
 
         if stop_event.is_set():
             GPIO.cleanup()
