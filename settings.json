@@ -2,32 +2,38 @@
     "door_button_one": {
         "simulated": true,
         "pin": 17,
-        "value": "DS1"
+        "runs_on": "PI1",
+        "name": "DS1"
     },
     "door_led_light": {
         "simulated": true,
         "pin": 18,
-        "value": "DL"
+        "runs_on": "PI1",
+        "name": "DL"
     },
      "door_buzzer": {
         "simulated": true,
         "pin": 22,
-        "value": "DB"
+        "runs_on": "PI1",
+        "name": "DB"
     },
     "door_ultrasonic_sensor_one": {
         "simulated": true,
         "pin_trig": 23,
         "pin_echo": 24,
-        "value": "DUS1"
+        "runs_on": "PI1",
+        "name": "DUS1"
     },
     "door_motion_sensor_one": {
         "simulated": true,
         "pin": 4,
-        "value": "DPIR1"
+        "runs_on": "PI1",
+        "name": "DPIR1"
     },
     "door_membrane_switch": {
         "simulated": true,
         "pins": [25, 8, 7, 1, 12, 16, 20, 21],
-        "value": "DMS"
+        "runs_on": "PI1",
+        "name": "DMS"
     }
 }
