@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # InfluxDB Configuration
 token = "MnETT6nOjyevCYF5obDzluansp1gyd1w9JbFSutVKUIXNtV6S8EaUeE-LBbMQ7pGUzTpJCJTP39jdks5TlyZoQ=="
-org = "nwt23"
+org = "iot"
 url = "http://localhost:8086"
 bucket = "iot"
 influxdb_client = InfluxDBClient(url=url, token=token, org=org)

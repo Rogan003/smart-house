@@ -60,8 +60,8 @@ if __name__ == "__main__":
     stop_event = threading.Event()
 
     try:
-        door_motion_sensor_one_settings = settings['door_button_one']
-        run_door_button_one(door_motion_sensor_one_settings, threads, stop_event)
+        door_button_one_settings = settings['door_button_one']
+        run_door_button_one(door_button_one_settings, threads, stop_event)
 
         door_motion_sensor_one_settings = settings['door_motion_sensor_one']
         run_door_motion_sensor_one(door_motion_sensor_one_settings, threads, stop_event)
