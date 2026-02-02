@@ -3,7 +3,6 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import paho.mqtt.client as mqtt
 import json
-from broker_settings import HOSTNAME, PORT
 
 
 app = Flask(__name__)
@@ -19,11 +18,11 @@ influxdb_client = InfluxDBClient(url=url, token=token, org=org)
 
 # MQTT Configuration
 mqtt_client = mqtt.Client()
-mqtt_client.connect(HOSTNAME, PORT, 60)
+mqtt_client.connect("localhost", 1883, 60)
 mqtt_client.loop_start()
 
 def on_connect(client, userdata, flags, rc):
-    client.subscribe("Door Buttton 1")
+    client.subscribe("Door Button 1")
     client.subscribe("Door Buzzer 1")
     client.subscribe("Door LED 1")
     client.subscribe("Door Membrane Switch")

@@ -45,11 +45,11 @@ def door_button_one_callback(settings):
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],
-        "pressed": "TRUE"
+        "value": "TRUE"
     }
 
     with counter_lock:
-        button_batch.append(('Door Buttton 1', json.dumps(button_press_payload), 0, True))
+        button_batch.append(('Door Button 1', json.dumps(button_press_payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:
