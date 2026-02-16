@@ -13,7 +13,8 @@
     },
     "kitchen_segment_display": {
         "simulated": true,
-        "pin": 18,
+        "pin": [25, 8, 7, 1, 12, 16, 20, 21],
+        "digit_pins": [5, 6, 9, 13],
         "runs_on": "PI2",
         "name": "4SD"
     },
@@ -38,7 +39,7 @@
     },
     "kitchen_gyroscope": {
         "simulated": true,
-        "pins": [25, 8, 7, 1, 12, 16, 20, 21],
+        "pins": 18,
         "runs_on": "PI2",
         "name": "GSG"
     }

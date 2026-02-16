@@ -5,6 +5,8 @@ from components.door_motion_sensor_two import run_door_motion_sensor_two
 from components.door_ultrasonic_sensor_two import run_door_ultrasonic_sensor_two
 from components.kitchen_button import run_kitchen_button
 from components.kitchen_dht import run_kitchen_dht
+from components.kitchen_segment_display import run_kitchen_segment_display
+from components.gyroscope import run_gyroscope
 
 from settings import load_settings
 import time
@@ -51,6 +53,12 @@ if __name__ == "__main__":
 
         kitchen_dht_settings = settings['kitchen_dht']
         run_kitchen_dht(kitchen_dht_settings, threads, stop_event)
+
+        kitchen_segment_display_settings = settings['kitchen_segment_display']
+        run_kitchen_segment_display(kitchen_segment_display_settings, threads, stop_event)
+
+        gyroscope_settings = settings['kitchen_gyroscope']
+        run_gyroscope(gyroscope_settings, threads, stop_event)
 
         menu(settings, threads, stop_event)
 

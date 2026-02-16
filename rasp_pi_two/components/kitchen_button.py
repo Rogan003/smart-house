@@ -7,6 +7,7 @@ import paho.mqtt.publish as publish
 
 from broker_settings import HOSTNAME, PORT
 from simulators.kitchen_button import run_kitchen_button_simulator
+from kitchen_timer import kitchen_timer
 
 button_batch = []
 publish_data_counter = 0
@@ -34,6 +35,7 @@ publisher_thread.start()
 
 def kitchen_button_callback(settings):
     global publish_data_counter, publish_data_limit
+    kitchen_timer.increment()
 
     t = time.localtime()
     print_gray("\n" + "="*20)
