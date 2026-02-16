@@ -1,5 +1,4 @@
 import time
-import random
 
 from colors import print_green
 
