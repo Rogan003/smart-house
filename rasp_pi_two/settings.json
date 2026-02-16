@@ -1,0 +1,45 @@
+{
+    "door_button_two": {
+        "simulated": true,
+        "pin": 17,
+        "runs_on": "PI2",
+        "name": "DS2"
+    },
+    "kitchen_button": {
+        "simulated": true,
+        "pin": 26,
+        "runs_on": "PI2",
+        "name": "BTN"
+    },
+    "kitchen_segment_display": {
+        "simulated": true,
+        "pin": 18,
+        "runs_on": "PI2",
+        "name": "4SD"
+    },
+     "kitchen_dht": {
+        "simulated": true,
+        "pin": 22,
+        "runs_on": "PI2",
+        "name": "DHT3"
+    },
+    "door_ultrasonic_sensor_two": {
+        "simulated": true,
+        "pin_trig": 23,
+        "pin_echo": 24,
+        "runs_on": "PI2",
+        "name": "DUS2"
+    },
+    "door_motion_sensor_two": {
+        "simulated": true,
+        "pin": 4,
+        "runs_on": "PI2",
+        "name": "DPIR2"
+    },
+    "kitchen_gyroscope": {
+        "simulated": true,
+        "pins": [25, 8, 7, 1, 12, 16, 20, 21],
+        "runs_on": "PI2",
+        "name": "GSG"
+    }
+}
