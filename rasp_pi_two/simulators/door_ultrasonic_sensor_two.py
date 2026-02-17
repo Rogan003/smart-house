@@ -5,7 +5,7 @@ from colors import print_magenta
 
 
 def generate_value(callback, settings):
-    distance = random.uniform(10, 100)
+    distance = round(random.uniform(10, 100), 2)
     callback(distance, settings)
     print_magenta(f"[Door 2] - Distance: {distance} cm (ultrasonic sensor)")
 

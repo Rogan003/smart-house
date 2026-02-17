@@ -48,6 +48,10 @@ services:
       - INFLUXDB_ORG=${INFLUXDB_ORG}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      # Allow embedding in iframes (for React webapp)
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
     networks:
       - iot-network
 
