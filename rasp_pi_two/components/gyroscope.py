@@ -38,19 +38,29 @@ def gyroscope_callback(accel, gyro, settings):
     print_yellow(f"Gyroscope: {gyro}")
     print_yellow(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
-    payload = {
-        "measurement": "Gyroscope",
-        "simulated": settings['simulated'],
-        "runs_on": settings["runs_on"],
-        "name": settings["name"],
-        "value": {
-            "accel": accel,
-            "gyro": gyro
-        }
-    }
-
+    axes = ['X', 'Y', 'Z']
+    
     with counter_lock:
-        gyro_batch.append(('Gyroscope', json.dumps(payload), 0, True))
+        for i, axis in enumerate(axes):
+            accel_payload = {
+                "measurement": f"Accelerometer {axis}",
+                "simulated": settings['simulated'],
+                "runs_on": settings["runs_on"],
+                "name": settings["name"],
+                "value": accel[i]
+            }
+            gyro_batch.append((f'Accelerometer {axis}', json.dumps(accel_payload), 0, True))
+
+        for i, axis in enumerate(axes):
+            gyro_payload = {
+                "measurement": f"Gyroscope {axis}",
+                "simulated": settings['simulated'],
+                "runs_on": settings["runs_on"],
+                "name": settings["name"],
+                "value": gyro[i]
+            }
+            gyro_batch.append((f'Gyroscope {axis}', json.dumps(gyro_payload), 0, True))
+            
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

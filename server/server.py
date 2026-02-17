@@ -18,8 +18,6 @@ influxdb_client = InfluxDBClient(url=url, token=token, org=org)
 
 # MQTT Configuration
 mqtt_client = mqtt.Client()
-mqtt_client.connect("localhost", 1883, 60)
-mqtt_client.loop_start()
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe("Door Button 1")
@@ -28,9 +26,25 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("Door Membrane Switch")
     client.subscribe("Door Motion Sensor 1")
     client.subscribe("Door Distance Sensor 1")
+    client.subscribe("Door Button 2")
+    client.subscribe("Door Motion Sensor 2")
+    client.subscribe("Door Distance Sensor 2")
+    client.subscribe("Accelerometer X")
+    client.subscribe("Accelerometer Y")
+    client.subscribe("Accelerometer Z")
+    client.subscribe("Gyroscope X")
+    client.subscribe("Gyroscope Y")
+    client.subscribe("Gyroscope Z")
+    client.subscribe("Kitchen Button")
+    client.subscribe("Temperature Kitchen")
+    client.subscribe("Humidity Kitchen")
+    client.subscribe("Kitchen Segment Display")
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = lambda client, userdata, msg: save_to_db(json.loads(msg.payload.decode('utf-8')))
+
+mqtt_client.connect("localhost", 1883, 60)
+mqtt_client.loop_start()
 
 
 def save_to_db(data):

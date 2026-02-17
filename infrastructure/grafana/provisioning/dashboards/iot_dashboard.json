@@ -106,7 +106,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DS1\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door button 1\")",
           "refId": "A"
         }
       ],
@@ -197,7 +197,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DB\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Buzzer 1\")",
           "refId": "A"
         }
       ],
@@ -288,7 +288,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DL\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door LED 1\")",
           "refId": "A"
         }
       ],
@@ -379,7 +379,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DMS\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Membrane Switch\")",
           "refId": "A"
         }
       ],
@@ -470,7 +470,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DPIR1\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Motion Sensor 1\")",
           "refId": "A"
         }
       ],
@@ -561,11 +561,696 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r.name == \"DUS1\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Distance Sensor 1\")",
           "refId": "A"
         }
       ],
       "title": "Door Distance Sensor 1",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door button 2\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Door Button 2",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Kitchen Button\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Kitchen Button",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Motion Sensor 2\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Door Motion Sensor 2",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Distance Sensor 2\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Door Distance Sensor 2",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Temperature Kitchen\")",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Humidity Kitchen\")",
+          "refId": "B"
+        }
+      ],
+      "title": "Kitchen DHT",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Kitchen Segment Display\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Kitchen 4-Digit 7-Segment Display",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Accelerometer X\")",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Accelerometer Y\")",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Accelerometer Z\")",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Gyroscope X\")",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Gyroscope Y\")",
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Gyroscope Z\")",
+          "refId": "F"
+        }
+      ],
+      "title": "Gyroscope",
       "type": "timeseries"
     }
   ],
