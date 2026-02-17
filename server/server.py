@@ -39,6 +39,14 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe("Temperature Kitchen")
     client.subscribe("Humidity Kitchen")
     client.subscribe("Kitchen Segment Display")
+    client.subscribe("Temperature Bedroom")
+    client.subscribe("Humidity Bedroom")
+    client.subscribe("Temperature Master Bedroom")
+    client.subscribe("Humidity Master Bedroom")
+    client.subscribe("Living Room Motion Sensor")
+    client.subscribe("Living Room Display")
+    client.subscribe("Bedroom RGB")
+    client.subscribe("Bedroom IR")
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = lambda client, userdata, msg: save_to_db(json.loads(msg.payload.decode('utf-8')))

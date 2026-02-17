@@ -5,6 +5,7 @@ import json
 import paho.mqtt.publish as publish
 from broker_settings import HOSTNAME, PORT
 from simulators.bedroom_dht import run_dht_simulator
+from dht_storage import dht_storage
 
 dht_batch = []
 publish_data_counter = 0
@@ -33,6 +34,7 @@ publisher_thread.start()
 
 def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLIB_OK", verbose=True):
     global publish_data_counter, publish_data_limit
+    dht_storage.update_dht1(temperature, humidity)
 
     if verbose:
         t = time.localtime()

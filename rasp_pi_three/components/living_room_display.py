@@ -1,0 +1,68 @@
+from colors import print_blue
+import threading
+import time
+import json
+import paho.mqtt.publish as publish
+
+from simulators.living_room_display import run_living_room_display_simulator
+from broker_settings import HOSTNAME, PORT
+
+lcd_batch = []
+publish_data_counter = 0
+publish_data_limit = 5
+counter_lock = threading.Lock()
+
+def publisher_task(event, lcd_batch):
+    global publish_data_counter
+    while True:
+        event.wait()
+        with counter_lock:
+            local_lcd_batch = lcd_batch.copy()
+            publish_data_counter = 0
+            lcd_batch.clear()
+        publish.multiple(local_lcd_batch, hostname=HOSTNAME, port=PORT)
+        print(f'published {len(local_lcd_batch)} LCD values')
+        event.clear()
+
+publish_event = threading.Event()
+publisher_thread = threading.Thread(target=publisher_task, args=(publish_event, lcd_batch,))
+publisher_thread.daemon = True
+publisher_thread.start()
+
+def living_room_display_callback(line1, line2, settings):
+    global publish_data_counter, publish_data_limit
+
+    t = time.localtime()
+    print_blue("\n" + "="*20)
+    print_blue(f"Living Room Display:\n{line1}\n{line2}")
+    print_blue(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+
+    payload = {
+        "measurement": "Living Room Display",
+        "simulated": settings['simulated'],
+        "runs_on": settings["runs_on"],
+        "name": settings["name"],
+        "value": f"{line1} | {line2}"
+    }
+
+    with counter_lock:
+        lcd_batch.append(('Living Room Display', json.dumps(payload), 0, True))
+        publish_data_counter += 1
+
+    if publish_data_counter >= publish_data_limit:
+        publish_event.set()
+
+def run_living_room_display(settings, threads, stop_event):
+    if settings['simulated']:
+        print_blue("[Living Room Display] Starting simulator")
+        thread = threading.Thread(target=run_living_room_display_simulator, args=(living_room_display_callback, stop_event, settings))
+        thread.start()
+        threads.append(thread)
+        print_blue("[Living Room Display] Simulator started")
+    else:
+        from sensors.living_room_display import run_living_room_display_loop
+        print_blue("[Living Room Display] Starting loop")
+        thread = threading.Thread(target=run_living_room_display_loop, args=(settings, living_room_display_callback, stop_event))
+        thread.start()
+        threads.append(thread)
+        print_blue("[Living Room Display] Loop started")

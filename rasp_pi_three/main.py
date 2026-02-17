@@ -3,6 +3,9 @@ import threading
 from components.living_room_motion_sensor import run_living_room_motion_sensor
 from components.bedroom_dht import run_bedroom_dht
 from components.master_bedroom_dht import run_master_bedroom_dht
+from components.living_room_display import run_living_room_display
+from components.bedroom_rgb import run_bedroom_rgb
+from components.bedroom_ir import run_bedroom_ir
 
 from settings import load_settings
 import time
@@ -15,17 +18,16 @@ except:
     pass
 
 def menu(settings, threads, stop_event):
-    kitchen_button_settings = settings['kitchen_button']
-
+    bedroom_ir_settings = settings['bedroom_infrared']
     while True:
         print("\n---- Menu ----")
-        print("1. click kitchen button")
+        print("1. Bedroom IR")
 
         user_input = input("Enter command: ")
 
         if user_input == "1":
-            run_kitchen_button(kitchen_button_settings, threads, stop_event)
-
+            button = input("Enter button (0-7): ")
+            run_bedroom_ir(bedroom_ir_settings, threads, stop_event, button)
         else:
             print("Oops, invalid command!\n")
         print()
@@ -46,6 +48,16 @@ if __name__ == "__main__":
 
         living_room_motion_sensor_settings = settings['living_room_motion_sensor']
         run_living_room_motion_sensor(living_room_motion_sensor_settings, threads, stop_event)
+
+        living_room_display_settings = settings['living_room_display']
+        run_living_room_display(living_room_display_settings, threads, stop_event)
+
+        bedroom_rgb_settings = settings['bedroom_rgb']
+        run_bedroom_rgb(bedroom_rgb_settings, threads, stop_event)
+
+        bedroom_ir_settings = settings['bedroom_infrared']
+        if not bedroom_ir_settings['simulated']:
+            run_bedroom_ir(bedroom_ir_settings, threads, stop_event)
 
         menu(settings, threads, stop_event)
 
