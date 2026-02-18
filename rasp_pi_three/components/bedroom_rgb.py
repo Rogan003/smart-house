@@ -21,7 +21,7 @@ def publisher_task(event, rgb_batch):
             publish_data_counter = 0
             rgb_batch.clear()
         publish.multiple(local_rgb_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {len(local_rgb_batch)} RGB values')
+        print(f'[BRGB] Published {len(local_rgb_batch)} RGB values')
         event.clear()
 
 publish_event = threading.Event()
@@ -34,7 +34,7 @@ def bedroom_rgb_callback(color, settings):
 
     t = time.localtime()
     print_magenta("\n" + "="*20)
-    print_magenta(f"Bedroom RGB: {color}")
+    print_magenta(f"[BRGB] Color: {color} (Bedroom RGB)")
     print_magenta(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     payload = {
@@ -54,15 +54,15 @@ def bedroom_rgb_callback(color, settings):
 
 def run_bedroom_rgb(settings, threads, stop_event):
     if settings['simulated']:
-        print_magenta("[Bedroom RGB] Starting simulator")
+        print_magenta("[BRGB] Starting simulator (Bedroom RGB)")
         thread = threading.Thread(target=run_bedroom_rgb_simulator, args=(bedroom_rgb_callback, stop_event, settings))
         thread.start()
         threads.append(thread)
-        print_magenta("[Bedroom RGB] Simulator started")
+        print_magenta("[BRGB] Simulator started (Bedroom RGB)")
     else:
         from sensors.bedroom_rgb import run_bedroom_rgb_loop
-        print_magenta("[Bedroom RGB] Starting loop")
+        print_magenta("[BRGB] Starting loop (Bedroom RGB)")
         thread = threading.Thread(target=run_bedroom_rgb_loop, args=(settings, bedroom_rgb_callback, stop_event))
         thread.start()
         threads.append(thread)
-        print_magenta("[Bedroom RGB] Loop started")
+        print_magenta("[BRGB] Loop started (Bedroom RGB)")

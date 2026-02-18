@@ -1,4 +1,6 @@
 import threading
+import json
+import paho.mqtt.client as mqtt
 
 from components.door_button_two import run_door_button_two
 from components.door_motion_sensor_two import run_door_motion_sensor_two
@@ -9,6 +11,8 @@ from components.kitchen_segment_display import run_kitchen_segment_display
 from components.gyroscope import run_gyroscope
 
 from settings import load_settings
+from broker_settings import HOSTNAME, PORT
+from kitchen_timer import kitchen_timer
 import time
 
 
@@ -17,6 +21,50 @@ try:
     GPIO.setmode(GPIO.BCM)
 except:
     pass
+
+
+# MQTT subscriber for control messages
+def on_connect(client, userdata, flags, rc):
+    print(f"[MQTT] Connected with result code {rc}")
+    client.subscribe("Timer Display")
+    client.subscribe("Timer Control")
+    print("[MQTT] Subscribed to Timer Display and Timer Control topics")
+
+
+def on_message(client, userdata, msg):
+    try:
+        topic = msg.topic
+        payload = json.loads(msg.payload.decode())
+        print(f"[MQTT] Received on {topic}: {payload}")
+
+        if topic == "Timer Display":
+            command = payload.get("command")
+            if command == "SET":
+                value = payload.get("value", "00:00")
+                # Parse MM:SS format
+                parts = value.split(":")
+                if len(parts) == 2:
+                    minutes = int(parts[0])
+                    seconds = int(parts[1])
+                    total_seconds = minutes * 60 + seconds
+                    kitchen_timer.set_time(total_seconds)
+                    print(f"[Timer] Set to {total_seconds} seconds")
+            elif command == "BLINK":
+                kitchen_timer.set_blinking(True)
+                print("[Timer] Blinking started")
+            elif command == "STOP_BLINK":
+                kitchen_timer.set_blinking(False)
+                print("[Timer] Blinking stopped")
+
+        elif topic == "Timer Control":
+            command = payload.get("command")
+            if command == "CONFIGURE":
+                add_seconds = payload.get("add_seconds", 10)
+                kitchen_timer.n = add_seconds
+                print(f"[Timer] Configured add_seconds to {add_seconds}")
+
+    except Exception as e:
+        print(f"[MQTT] Error processing message: {e}")
 
 def menu(settings, threads, stop_event):
     kitchen_button_settings = settings['kitchen_button']
@@ -40,6 +88,14 @@ if __name__ == "__main__":
     settings = load_settings()
     threads = []
     stop_event = threading.Event()
+
+    # Start MQTT subscriber client for control messages
+    mqtt_client = mqtt.Client()
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+    mqtt_client.connect(HOSTNAME, PORT, 60)
+    mqtt_client.loop_start()
+    print("[MQTT] Subscriber client started")
 
     try:
         door_button_two_settings = settings['door_button_two']
@@ -67,5 +123,7 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         print('Stopping app')
+        mqtt_client.loop_stop()
+        mqtt_client.disconnect()
         for t in threads:
             stop_event.set()

@@ -5,7 +5,7 @@ from colors import print_green
 
 
 def button_pressed(channel, callback, settings):
-    callback(settings)
+    callback(settings, "TRUE")
     print_green("[Door 1] - Door opened")
 
 def run_door_button_one_loop(settings, callback, stop_event):

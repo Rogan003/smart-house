@@ -1,17 +1,17 @@
-from colors import print_gray, print_blue
+from colors import print_white, print_blue, Colors, print_with_timestamp
 
 import threading
 import time
 import json
 import paho.mqtt.publish as publish
 
-from simulators.door_buzzer_one import run_door_buzzer_one_simulator
+from simulators.door_buzzer_one import run_door_buzzer_one_simulator, run_door_buzzer_one_simulator_loop
 from broker_settings import HOSTNAME, PORT
 
 
 buzzer_batch = []
 publish_data_counter = 0
-publish_data_limit = 5
+publish_data_limit = 1
 counter_lock = threading.Lock()
 
 
@@ -38,8 +38,7 @@ def door_buzzer_one_callback(settings):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_gray("\n" + "="*20)
-    print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+    print_with_timestamp(Colors.BLUE, f"[DB1] active (Door Buzzer 1)", time.strftime('%H:%M:%S', t))
 
     buzzer_payload = {
         "measurement": "Door Buzzer 1",
@@ -61,6 +60,21 @@ def run_door_buzzer_one(settings, threads, stop_event):
     if settings['simulated']:
         print_blue("[Door 1] Starting buzzer simulator")
         door_buzzer_one_thread = threading.Thread(target = run_door_buzzer_one_simulator, args=(door_buzzer_one_callback, settings))
+        door_buzzer_one_thread.start()
+        threads.append(door_buzzer_one_thread)
+    else:
+        from sensors.door_buzzer_one import run_door_buzzer_one_loop
+        print_blue("[Door 1] Starting buzzer loop")
+        door_buzzer_one_thread = threading.Thread(target=run_door_buzzer_one_loop, args=(settings, door_buzzer_one_callback, stop_event))
+        door_buzzer_one_thread.start()
+        threads.append(door_buzzer_one_thread)
+
+
+def run_door_buzzer_one_continuous(settings, threads, stop_event):
+    """Run buzzer in continuous mode that listens for MQTT control messages"""
+    if settings['simulated']:
+        print_blue("[Door 1] Starting continuous buzzer simulator (MQTT controlled)")
+        door_buzzer_one_thread = threading.Thread(target=run_door_buzzer_one_simulator_loop, args=(door_buzzer_one_callback, stop_event, settings))
         door_buzzer_one_thread.start()
         threads.append(door_buzzer_one_thread)
     else:

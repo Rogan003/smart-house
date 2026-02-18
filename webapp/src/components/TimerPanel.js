@@ -3,6 +3,8 @@ import axios from 'axios';
 
 const API_BASE = 'http://localhost:5000';
 
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+
 function TimerPanel() {
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);

@@ -21,7 +21,7 @@ def publisher_task(event, segment_batch):
             publish_data_counter = 0
             segment_batch.clear()
         publish.multiple(local_segment_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {len(local_segment_batch)} segment display values')
+        print(f'[4SD] Published {len(local_segment_batch)} segment display values')
         event.clear()
 
 publish_event = threading.Event()
@@ -34,7 +34,7 @@ def kitchen_segment_display_callback(settings, timer_val):
 
     t = time.localtime()
     print_blue("\n" + "="*20)
-    print_blue(f"Kitchen segment display: {timer_val}")
+    print_blue(f"[4SD] Display: {timer_val} (Kitchen Segment Display)")
     print_blue(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     payload = {
@@ -54,15 +54,15 @@ def kitchen_segment_display_callback(settings, timer_val):
 
 def run_kitchen_segment_display(settings, threads, stop_event):
     if settings['simulated']:
-        print_blue("[Kitchen 4SD] Starting segment display simulator")
+        print_blue("[4SD] Starting simulator (Kitchen Segment Display)")
         thread = threading.Thread(target=run_kitchen_segment_display_simulator, args=(kitchen_segment_display_callback, stop_event, settings))
         thread.start()
         threads.append(thread)
-        print_blue("[Kitchen 4SD] Segment display simulator started")
+        print_blue("[4SD] Simulator started (Kitchen Segment Display)")
     else:
         from sensors.kitchen_segment_display import run_kitchen_segment_display_loop
-        print_blue("[Kitchen 4SD] Starting segment display loop")
+        print_blue("[4SD] Starting loop (Kitchen Segment Display)")
         thread = threading.Thread(target=run_kitchen_segment_display_loop, args=(settings, kitchen_segment_display_callback, stop_event))
         thread.start()
         threads.append(thread)
-        print_blue("[Kitchen 4SD] Segment display loop started")
+        print_blue("[4SD] Loop started (Kitchen Segment Display)")

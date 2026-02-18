@@ -31,6 +31,11 @@ function GrafanaPanel() {
     { name: 'Bedroom IR', panelId: 'panel-19' },
   ];
 
+  const systemPanels = [
+    { name: 'Alarm Events', panelId: 'panel-20' },
+    { name: 'People Count', panelId: 'panel-21' },
+  ];
+
   const getIframeSrc = (panelId) => {
     return `http://localhost:3000/d-solo/iot-app-dashboard/iot-app-dashboard?orgId=1&refresh=5s&panelId=${panelId}&__feature.dashboardSceneSolo=true`;
   };
@@ -75,6 +80,12 @@ function GrafanaPanel() {
         >
           PI3 - Bedrooms
         </button>
+        <button
+          className={`grafana-tab ${activeTab === 'SYSTEM' ? 'active' : ''}`}
+          onClick={() => setActiveTab('SYSTEM')}
+        >
+          🚨 System & Alarms
+        </button>
       </div>
 
       <div className="grafana-content">
@@ -94,6 +105,12 @@ function GrafanaPanel() {
           <div>
             <h3>PI3 - Bedrooms + Living Room (6 components)</h3>
             {renderPanels(pi3Panels)}
+          </div>
+        )}
+        {activeTab === 'SYSTEM' && (
+          <div>
+            <h3>🚨 System Events & Statistics (2 panels)</h3>
+            {renderPanels(systemPanels)}
           </div>
         )}
       </div>

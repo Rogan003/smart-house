@@ -21,7 +21,7 @@ def publisher_task(event, gyro_batch):
             publish_data_counter = 0
             gyro_batch.clear()
         publish.multiple(local_gyro_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {len(local_gyro_batch)} gyro values')
+        print(f'[GSG] Published {len(local_gyro_batch)} gyro values')
         event.clear()
 
 publish_event = threading.Event()
@@ -34,8 +34,8 @@ def gyroscope_callback(accel, gyro, settings):
 
     t = time.localtime()
     print_yellow("\n" + "="*20)
-    print_yellow(f"Accelerometer: {accel}")
-    print_yellow(f"Gyroscope: {gyro}")
+    print_yellow(f"[GSG] Accelerometer: {accel}")
+    print_yellow(f"[GSG] Gyroscope: {gyro}")
     print_yellow(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     axes = ['X', 'Y', 'Z']
@@ -68,15 +68,15 @@ def gyroscope_callback(accel, gyro, settings):
 
 def run_gyroscope(settings, threads, stop_event):
     if settings['simulated']:
-        print_yellow("[Gyroscope] Starting gyroscope simulator")
+        print_yellow("[GSG] Starting simulator (Gyroscope Sensor)")
         thread = threading.Thread(target=run_gyroscope_simulator, args=(2, gyroscope_callback, stop_event, settings))
         thread.start()
         threads.append(thread)
-        print_yellow("[Gyroscope] Gyroscope simulator started")
+        print_yellow("[GSG] Simulator started (Gyroscope Sensor)")
     else:
         from sensors.MPU6050.gyro import run_gyroscope_loop
-        print_yellow("[Gyroscope] Starting gyroscope loop")
+        print_yellow("[GSG] Starting loop (Gyroscope Sensor)")
         thread = threading.Thread(target=run_gyroscope_loop, args=(2, gyroscope_callback, stop_event, settings))
         thread.start()
         threads.append(thread)
-        print_yellow("[Gyroscope] Gyroscope loop started")
+        print_yellow("[GSG] Loop started (Gyroscope Sensor)")

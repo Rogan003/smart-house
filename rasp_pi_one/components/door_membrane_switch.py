@@ -1,4 +1,4 @@
-from colors import print_gray, print_green
+from colors import print_white, print_green, Colors, print_with_timestamp
 
 import threading
 import time
@@ -11,7 +11,7 @@ from broker_settings import HOSTNAME, PORT
 
 membrane_batch = []
 publish_data_counter = 0
-publish_data_limit = 5
+publish_data_limit = 1
 counter_lock = threading.Lock()
 
 
@@ -38,8 +38,7 @@ def door_membrane_switch_callback(key, settings):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_gray("\n" + "="*20)
-    print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}, Key '{key}' pressed")
+    print_with_timestamp(Colors.GREEN, f"[DMS] '{key}' pressed (Door Membrane Switch)", time.strftime('%H:%M:%S', t))
 
     membrane_payload = {
         "measurement": "Door Membrane Switch",

@@ -22,7 +22,7 @@ def publisher_task(event, dht_batch):
             publish_data_counter = 0
             dht_batch.clear()
         publish.multiple(local_dht_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {publish_data_limit} kitchen dht values')
+        print(f'[DHT3] Published {publish_data_limit} kitchen DHT values')
         event.clear()
 
 
@@ -38,7 +38,7 @@ def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLI
     if verbose:
         t = time.localtime()
         print_green("="*20)
-        print_green("Kitchen DHT")
+        print_green("[DHT3] Kitchen DHT")
         print_green(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
         print_green(f"Code: {code}")
         print_green(f"Humidity: {humidity}%")
@@ -71,16 +71,16 @@ def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLI
 
 def run_kitchen_dht(settings, threads, stop_event):
     if settings['simulated']:
-        print_green("[Kitchen DHT] Starting similator")
+        print_green("[DHT3] Starting simulator (Kitchen DHT)")
         kitchen_dht_thread = threading.Thread(target = run_dht_simulator, args=(2, dht_callback, stop_event, publish_event, settings))
         kitchen_dht_thread.start()
         threads.append(kitchen_dht_thread)
-        print_green("[Kitchen DHT] similator started")
+        print_green("[DHT3] Simulator started (Kitchen DHT)")
     else:
         from sensors.kitchen_dht import run_dht_loop, DHT
-        print_green("[Kitchen DHT] Starting loop")
+        print_green("[DHT3] Starting loop (Kitchen DHT)")
         dht = DHT(settings['pin'])
         kitchen_dht_thread = threading.Thread(target=run_dht_loop, args=(dht, 2, dht_callback, stop_event, publish_event, settings))
         kitchen_dht_thread.start()
         threads.append(kitchen_dht_thread)
-        print_green("[Kitchen DHT] loop started")
+        print_green("[DHT3] Loop started (Kitchen DHT)")

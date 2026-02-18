@@ -33,3 +33,12 @@ def print_white(text):
 
 def print_gray(text):
     print(Colors.GRAY + text + Colors.RESET)
+
+def print_separator():
+    print(Colors.GRAY + "-" * 60 + Colors.RESET)
+
+def print_with_timestamp(color, text, timestamp):
+    """Print new line, then colored text followed by white timestamp on the same line, then separator"""
+    print()
+    print(color + text + Colors.WHITE + "  Timestamp: " + timestamp + Colors.RESET)
+    print_separator()

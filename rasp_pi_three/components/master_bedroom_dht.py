@@ -22,7 +22,7 @@ def publisher_task(event, dht_batch):
             publish_data_counter = 0
             dht_batch.clear()
         publish.multiple(local_dht_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {publish_data_limit} master_bedroom dht values')
+        print(f'[DHT2] Published {publish_data_limit} master bedroom DHT values')
         event.clear()
 
 
@@ -39,7 +39,7 @@ def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLI
     if verbose:
         t = time.localtime()
         print_blue("="*20)
-        print_blue("Master Bedroom DHT")
+        print_blue("[DHT2] Master Bedroom DHT")
         print_blue(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
         print_blue(f"Code: {code}")
         print_blue(f"Humidity: {humidity}%")
@@ -72,16 +72,16 @@ def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLI
 
 def run_master_bedroom_dht(settings, threads, stop_event):
     if settings['simulated']:
-        print_blue("[Master Bedroom DHT] Starting similator")
+        print_blue("[DHT2] Starting simulator (Master Bedroom DHT)")
         master_bedroom_dht_thread = threading.Thread(target = run_dht_simulator, args=(2, dht_callback, stop_event, publish_event, settings))
         master_bedroom_dht_thread.start()
         threads.append(master_bedroom_dht_thread)
-        print_blue("[Master Bedroom DHT] similator started")
+        print_blue("[DHT2] Simulator started (Master Bedroom DHT)")
     else:
         from sensors.master_bedroom_dht import run_dht_loop, DHT
-        print_blue("[Master Bedroom DHT] Starting loop")
+        print_blue("[DHT2] Starting loop (Master Bedroom DHT)")
         dht = DHT(settings['pin'])
         master_bedroom_dht_thread = threading.Thread(target=run_dht_loop, args=(dht, 2, dht_callback, stop_event, publish_event, settings))
         master_bedroom_dht_thread.start()
         threads.append(master_bedroom_dht_thread)
-        print_blue("[Master Bedroom DHT] loop started")
+        print_blue("[DHT2] Loop started (Master Bedroom DHT)")

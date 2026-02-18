@@ -41,6 +41,16 @@ function App() {
     try {
       await axios.post(`${API_BASE}/alarm/deactivate`);
       setAlarmState(false);
+      // automatically activate security system after 10 seconds
+      setTimeout(async () => {
+        try {
+          await axios.post(`${API_BASE}/system/activate`);
+          setSystemActive(true);
+          console.log('Security system automatically activated after alarm deactivation');
+        } catch (error) {
+          console.error('Error auto-activating system:', error);
+        }
+      }, 10000);
     } catch (error) {
       console.error('Error deactivating alarm:', error);
     }

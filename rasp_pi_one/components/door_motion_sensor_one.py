@@ -1,4 +1,4 @@
-from colors import print_gray, print_brown
+from colors import print_white, print_brown, Colors, print_with_timestamp
 
 import threading
 import time
@@ -11,7 +11,7 @@ from broker_settings import HOSTNAME, PORT
 
 motion_batch = []
 publish_data_counter = 0
-publish_data_limit = 5
+publish_data_limit = 1
 counter_lock = threading.Lock()
 
 
@@ -24,7 +24,7 @@ def publisher_task(event, motion_batch):
             publish_data_counter = 0
             motion_batch.clear()
         publish.multiple(local_motion_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {publish_data_limit} motion values')
+        print(f'[DPIR1] Published {publish_data_limit} motion values')
         event.clear()
 
 
@@ -38,8 +38,7 @@ def door_motion_sensor_one_callback(settings, status):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_gray("\n" + "="*20)
-    print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+    print_with_timestamp(Colors.BROWN, f"[DPIR1] {status} (Door PIR Sensor 1)", time.strftime('%H:%M:%S', t))
 
     motion_payload = {
         "measurement": "Door Motion Sensor 1",
@@ -59,15 +58,15 @@ def door_motion_sensor_one_callback(settings, status):
 
 def run_door_motion_sensor_one(settings, threads, stop_event):
     if settings['simulated']:
-        print_brown("[Door 1] Starting motion sensor simulator")
+        print_brown("[DPIR1] Starting simulator (Door PIR Sensor 1)")
         door_motion_sensor_one_thread = threading.Thread(target = run_door_motion_sensor_one_simulator, args=(2, door_motion_sensor_one_callback, stop_event, settings))
         door_motion_sensor_one_thread.start()
         threads.append(door_motion_sensor_one_thread)
-        print_brown("[Door 1] Motion sensor simulator started")
+        print_brown("[DPIR1] Simulator started (Door PIR Sensor 1)")
     else:
         from sensors.door_motion_sensor_one import run_door_motion_sensor_one_loop
-        print_brown("[Door 1] Starting motion sensor loop")
+        print_brown("[DPIR1] Starting loop (Door PIR Sensor 1)")
         door_motion_sensor_one_thread = threading.Thread(target=run_door_motion_sensor_one_loop, args=(settings, door_motion_sensor_one_callback, stop_event))
         door_motion_sensor_one_thread.start()
         threads.append(door_motion_sensor_one_thread)
-        print_brown("[Door 1] Motion sensor loop started")
+        print_brown("[DPIR1] Loop started (Door PIR Sensor 1)")

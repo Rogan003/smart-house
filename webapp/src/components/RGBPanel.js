@@ -19,27 +19,51 @@ function RGBPanel() {
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
 
   const handleToggle = async () => {
+    console.log('handleToggle called, isOn:', isOn);
     try {
-      if (isOn) {
-        await axios.post(`${API_BASE}/rgb/off`);
-        setIsOn(false);
-      } else {
-        await axios.post(`${API_BASE}/rgb/on`);
-        setIsOn(true);
-      }
+      const url = isOn ? `${API_BASE}/rgb/off` : `${API_BASE}/rgb/on`;
+      console.log('Sending POST to', url);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({})
+      });
+      
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+      setIsOn(!isOn);
     } catch (error) {
-      console.error('Error toggling RGB:', error);
+      console.error('Error toggling RGB:', error.message);
+      alert('Error: ' + error.message);
     }
   };
 
   const handleColorChange = async (color) => {
+    console.log('handleColorChange called, color:', color);
     try {
       setSelectedColor(color);
-      await axios.post(`${API_BASE}/rgb/color`, { 
-        r: color.rgb[0], 
-        g: color.rgb[1], 
-        b: color.rgb[2] 
+      console.log('Sending POST to /rgb/color');
+      
+      const response = await fetch(`${API_BASE}/rgb/color`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          r: color.rgb[0], 
+          g: color.rgb[1], 
+          b: color.rgb[2] 
+        })
       });
+      
+      const data = await response.json();
+      console.log('Response:', data);
       if (!isOn) {
         setIsOn(true);
       }

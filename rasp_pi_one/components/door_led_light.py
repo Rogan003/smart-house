@@ -1,4 +1,4 @@
-from colors import print_gray, print_yellow
+from colors import print_white, print_yellow, Colors, print_with_timestamp
 
 import threading
 import time
@@ -24,7 +24,7 @@ def publisher_task(event, led_batch):
             publish_data_counter = 0
             led_batch.clear()
         publish.multiple(local_led_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {publish_data_limit} led values')
+        print(f'[DL1] Published {publish_data_limit} led values')
         event.clear()
 
 
@@ -34,19 +34,18 @@ publisher_thread.daemon = True
 publisher_thread.start()
 
 
-def door_led_light_callback(settings):
+def door_led_light_callback(settings, value="ON"):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_gray("\n" + "="*20)
-    print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+    print_with_timestamp(Colors.YELLOW, f"[DL1] {value} (Door LED 1)", time.strftime('%H:%M:%S', t))
 
     led_payload = {
         "measurement": "Door LED 1",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],
-        "value": "active"
+        "value": value
     }
 
     with counter_lock:
@@ -59,13 +58,15 @@ def door_led_light_callback(settings):
 
 def run_door_led_lights(settings, threads, stop_event):
     if settings['simulated']:
-        print_yellow("[Door 1] Starting LED light simulator")
-        door_led_light_thread = threading.Thread(target = run_door_led_light_simulator, args=(door_led_light_callback, settings))
+        print_yellow("[DL1] Starting LED light simulator")
+        door_led_light_thread = threading.Thread(target=run_door_led_light_simulator, args=(door_led_light_callback, settings, stop_event))
         door_led_light_thread.start()
         threads.append(door_led_light_thread)
+        print_yellow("[DL1] LED light simulator started")
     else:
         from sensors.door_led_light import run_door_led_light_loop
-        print_yellow("[Door 1] Starting LED light loop")
+        print_yellow("[DL1] Starting LED light loop")
         door_led_light_thread = threading.Thread(target=run_door_led_light_loop, args=(settings, door_led_light_callback, stop_event))
         door_led_light_thread.start()
         threads.append(door_led_light_thread)
+        print_yellow("[DL1] LED light loop started")

@@ -1,4 +1,6 @@
 import threading
+import json
+import paho.mqtt.client as mqtt
 
 from components.living_room_motion_sensor import run_living_room_motion_sensor
 from components.bedroom_dht import run_bedroom_dht
@@ -8,6 +10,8 @@ from components.bedroom_rgb import run_bedroom_rgb
 from components.bedroom_ir import run_bedroom_ir
 
 from settings import load_settings
+from broker_settings import HOSTNAME, PORT
+from rgb_controller import rgb_controller
 import time
 
 
@@ -16,6 +20,37 @@ try:
     GPIO.setmode(GPIO.BCM)
 except:
     pass
+
+
+# MQTT subscriber for control messages
+def on_connect(client, userdata, flags, rc):
+    print(f"[MQTT] Connected with result code {rc}")
+    client.subscribe("RGB Control")
+    print("[MQTT] Subscribed to RGB Control topic")
+
+
+def on_message(client, userdata, msg):
+    try:
+        topic = msg.topic
+        payload = json.loads(msg.payload.decode())
+        print(f"[MQTT] Received on {topic}: {payload}")
+
+        if topic == "RGB Control":
+            command = payload.get("command")
+            if command == "ON":
+                color = payload.get("color", {"r": 255, "g": 255, "b": 255})
+                rgb_controller.set_color(f"rgb({color['r']},{color['g']},{color['b']})")
+                print(f"[RGB] Turned ON with color: {color}")
+            elif command == "OFF":
+                rgb_controller.set_color("off")
+                print("[RGB] Turned OFF")
+            elif command == "COLOR":
+                color = payload.get("color", {"r": 255, "g": 0, "b": 0})
+                rgb_controller.set_color(f"rgb({color['r']},{color['g']},{color['b']})")
+                print(f"[RGB] Color set to: {color}")
+
+    except Exception as e:
+        print(f"[MQTT] Error processing message: {e}")
 
 def menu(settings, threads, stop_event):
     bedroom_ir_settings = settings['bedroom_infrared']
@@ -38,6 +73,14 @@ if __name__ == "__main__":
     settings = load_settings()
     threads = []
     stop_event = threading.Event()
+
+    # Start MQTT subscriber client for control messages
+    mqtt_client = mqtt.Client()
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+    mqtt_client.connect(HOSTNAME, PORT, 60)
+    mqtt_client.loop_start()
+    print("[MQTT] Subscriber client started")
 
     try:
         bedroom_dht_settings = settings['bedroom_dht']
@@ -66,5 +109,7 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         print('Stopping app')
+        mqtt_client.loop_stop()
+        mqtt_client.disconnect()
         for t in threads:
             stop_event.set()

@@ -22,7 +22,7 @@ def publisher_task(event, ir_batch):
             publish_data_counter = 0
             ir_batch.clear()
         publish.multiple(local_ir_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {len(local_ir_batch)} IR values')
+        print(f'[IR] Published {len(local_ir_batch)} IR values')
         event.clear()
 
 publish_event = threading.Event()
@@ -35,7 +35,7 @@ def bedroom_ir_callback(button, settings):
 
     t = time.localtime()
     print_white("\n" + "="*20)
-    print_white(f"Bedroom IR: Button {button} pressed")
+    print_white(f"[IR] Button {button} pressed (Bedroom IR Receiver)")
     print_white(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     # Control RGB
@@ -74,15 +74,15 @@ def bedroom_ir_callback(button, settings):
 def run_bedroom_ir(settings, threads, stop_event, button=None):
     if settings['simulated']:
         if button is not None:
-            print_white("[Bedroom IR] Starting simulator")
+            print_white("[IR] Starting simulator (Bedroom IR Receiver)")
             thread = threading.Thread(target=run_bedroom_ir_simulator, args=(bedroom_ir_callback, settings, button))
             thread.start()
             threads.append(thread)
-            print_white("[Bedroom IR] Simulator started")
+            print_white("[IR] Simulator started (Bedroom IR Receiver)")
     else:
         from sensors.bedroom_ir import run_bedroom_ir_loop
-        print_white("[Bedroom IR] Starting loop")
+        print_white("[IR] Starting loop (Bedroom IR Receiver)")
         thread = threading.Thread(target=run_bedroom_ir_loop, args=(settings, bedroom_ir_callback, stop_event))
         thread.start()
         threads.append(thread)
-        print_white("[Bedroom IR] Loop started")
+        print_white("[IR] Loop started (Bedroom IR Receiver)")

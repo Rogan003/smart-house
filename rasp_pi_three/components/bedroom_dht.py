@@ -22,7 +22,7 @@ def publisher_task(event, dht_batch):
             publish_data_counter = 0
             dht_batch.clear()
         publish.multiple(local_dht_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {publish_data_limit} bedroom dht values')
+        print(f'[DHT1] Published {publish_data_limit} bedroom DHT values')
         event.clear()
 
 
@@ -39,7 +39,7 @@ def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLI
     if verbose:
         t = time.localtime()
         print_green("="*20)
-        print_green("Bedroom DHT")
+        print_green("[DHT1] Bedroom DHT")
         print_green(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
         print_green(f"Code: {code}")
         print_green(f"Humidity: {humidity}%")
@@ -72,16 +72,16 @@ def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLI
 
 def run_bedroom_dht(settings, threads, stop_event):
     if settings['simulated']:
-        print_green("[Bedroom DHT] Starting similator")
+        print_green("[DHT1] Starting simulator (Bedroom DHT)")
         bedroom_dht_thread = threading.Thread(target = run_dht_simulator, args=(2, dht_callback, stop_event, publish_event, settings))
         bedroom_dht_thread.start()
         threads.append(bedroom_dht_thread)
-        print_green("[Bedroom DHT] similator started")
+        print_green("[DHT1] Simulator started (Bedroom DHT)")
     else:
         from sensors.bedroom_dht import run_dht_loop, DHT
-        print_green("[Bedroom DHT] Starting loop")
+        print_green("[DHT1] Starting loop (Bedroom DHT)")
         dht = DHT(settings['pin'])
         bedroom_dht_thread = threading.Thread(target=run_dht_loop, args=(dht, 2, dht_callback, stop_event, publish_event, settings))
         bedroom_dht_thread.start()
         threads.append(bedroom_dht_thread)
-        print_green("[Bedroom DHT] loop started")
+        print_green("[DHT1] Loop started (Bedroom DHT)")

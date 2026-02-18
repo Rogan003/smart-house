@@ -1,4 +1,4 @@
-from colors import print_gray, print_magenta
+from colors import print_white, print_magenta, Colors, print_with_timestamp
 
 import threading
 import time
@@ -38,8 +38,7 @@ def door_ultrasonic_sensor_one_callback(distance, settings):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_gray("\n" + "="*20)
-    print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}, Distance: {distance} cm")
+    print_with_timestamp(Colors.MAGENTA, f"[DUS1] {distance} cm (Door Ultrasonic Sensor 1)", time.strftime('%H:%M:%S', t))
 
     ultrasonic_payload = {
         "measurement": "Door Distance Sensor 1",

@@ -1,7 +1,5 @@
 import time
 
-from colors import print_green
-
 
 keys = [
     ["1", "2", "3", "A"],
@@ -14,4 +12,3 @@ def run_door_membrane_switch_simulator(delay, callback, stop_event, row, col, se
     time.sleep(delay)
     key = keys[row][col]
     callback(key, settings)
-    print_green(f"[Door 1] - Key '{key}' pressed (membrane switch)")

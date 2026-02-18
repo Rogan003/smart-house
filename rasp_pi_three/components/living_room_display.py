@@ -21,7 +21,7 @@ def publisher_task(event, lcd_batch):
             publish_data_counter = 0
             lcd_batch.clear()
         publish.multiple(local_lcd_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {len(local_lcd_batch)} LCD values')
+        print(f'[LCD] Published {len(local_lcd_batch)} LCD values')
         event.clear()
 
 publish_event = threading.Event()
@@ -34,7 +34,7 @@ def living_room_display_callback(line1, line2, settings):
 
     t = time.localtime()
     print_blue("\n" + "="*20)
-    print_blue(f"Living Room Display:\n{line1}\n{line2}")
+    print_blue(f"[LCD] Display:\n{line1}\n{line2}")
     print_blue(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
 
     payload = {
@@ -54,15 +54,15 @@ def living_room_display_callback(line1, line2, settings):
 
 def run_living_room_display(settings, threads, stop_event):
     if settings['simulated']:
-        print_blue("[Living Room Display] Starting simulator")
+        print_blue("[LCD] Starting simulator (Living Room Display)")
         thread = threading.Thread(target=run_living_room_display_simulator, args=(living_room_display_callback, stop_event, settings))
         thread.start()
         threads.append(thread)
-        print_blue("[Living Room Display] Simulator started")
+        print_blue("[LCD] Simulator started (Living Room Display)")
     else:
         from sensors.living_room_display import run_living_room_display_loop
-        print_blue("[Living Room Display] Starting loop")
+        print_blue("[LCD] Starting loop (Living Room Display)")
         thread = threading.Thread(target=run_living_room_display_loop, args=(settings, living_room_display_callback, stop_event))
         thread.start()
         threads.append(thread)
-        print_blue("[Living Room Display] Loop started")
+        print_blue("[LCD] Loop started (Living Room Display)")

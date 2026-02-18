@@ -28,7 +28,7 @@ services:
       - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
     volumes:
-      - ./influxdb/data:/var/lib/influxdb:rw
+      - ./influxdb/data:/var/lib/influxdb2:rw
     networks:
       - iot-network
 
