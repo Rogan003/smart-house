@@ -158,7 +158,7 @@ def save_to_db(data):
             .tag("simulated", str(data.get("simulated", True)))
             .tag("runs_on", data.get("runs_on", ""))
             .tag("name", data.get("name", ""))
-            .field("measurement", str(data.get("value", "")))
+            .field("measurement", data.get("value", ""))
         )
         write_api.write(bucket=bucket, org=org, record=point)
     except Exception as e:
