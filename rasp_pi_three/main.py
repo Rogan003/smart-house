@@ -12,6 +12,7 @@ from components.bedroom_ir import run_bedroom_ir
 from settings import load_settings
 from broker_settings import HOSTNAME, PORT
 from rgb_controller import rgb_controller
+from dht_storage import dht_storage
 import time
 
 
@@ -26,7 +27,9 @@ except:
 def on_connect(client, userdata, flags, rc):
     print(f"[MQTT] Connected with result code {rc}")
     client.subscribe("RGB Control")
-    print("[MQTT] Subscribed to RGB Control topic")
+    client.subscribe("Temperature Kitchen")
+    client.subscribe("Humidity Kitchen")
+    print("[MQTT] Subscribed to RGB Control, Temperature Kitchen and Humidity Kitchen topics")
 
 
 def on_message(client, userdata, msg):
@@ -48,6 +51,18 @@ def on_message(client, userdata, msg):
                 color = payload.get("color", {"r": 255, "g": 0, "b": 0})
                 rgb_controller.set_color(f"rgb({color['r']},{color['g']},{color['b']})")
                 print(f"[RGB] Color set to: {color}")
+
+        elif topic == "Temperature Kitchen":
+            temp = payload.get("value")
+            _, hum = dht_storage.get_dht3()
+            dht_storage.update_dht3(temp, hum)
+            print(f"[DHT3] Temperature Kitchen updated: {temp}")
+
+        elif topic == "Humidity Kitchen":
+            hum = payload.get("value")
+            temp, _ = dht_storage.get_dht3()
+            dht_storage.update_dht3(temp, hum)
+            print(f"[DHT3] Humidity Kitchen updated: {hum}")
 
     except Exception as e:
         print(f"[MQTT] Error processing message: {e}")

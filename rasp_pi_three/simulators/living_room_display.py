@@ -2,7 +2,7 @@ import time
 from dht_storage import dht_storage
 
 def run_living_room_display_simulator(callback, stop_event, settings):
-    states = ["DHT1", "DHT2", "Hardcoded"]
+    states = ["DHT1", "DHT2", "DHT3"]
     state_index = 0
     last_switch_time = time.time()
 
@@ -21,9 +21,10 @@ def run_living_room_display_simulator(callback, stop_event, settings):
             temp, hum = dht_storage.get_dht2()
             line1 = f"DHT2 Temp: {temp}C"
             line2 = f"DHT2 Hum: {hum}%"
-        else: # Hardcoded
-            line1 = "Temp: 25C"
-            line2 = "Hum: 45%"
+        else: # DHT3
+            temp, hum = dht_storage.get_dht3()
+            line1 = f"DHT3 Temp: {temp}C"
+            line2 = f"DHT3 Hum: {hum}%"
 
         callback(line1, line2, settings)
         time.sleep(1)
