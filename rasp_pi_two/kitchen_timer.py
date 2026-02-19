@@ -10,11 +10,14 @@ class KitchenTimer:
     def increment(self):
         with self.lock:
             self.current_time += self.n
+            self.blinking = False
 
     def decrement(self):
         with self.lock:
             if self.current_time > 0:
                 self.current_time -= 1
+                if self.current_time == 0:
+                    self.blinking = True
             return self.current_time
 
     def get_time(self):

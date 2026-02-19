@@ -35,7 +35,10 @@ publisher_thread.start()
 
 def kitchen_button_callback(settings):
     global publish_data_counter, publish_data_limit
-    kitchen_timer.increment()
+    if kitchen_timer.is_blinking():
+        kitchen_timer.set_blinking(False)
+    else:
+        kitchen_timer.increment()
 
     t = time.localtime()
     print_gray("\n" + "="*20)

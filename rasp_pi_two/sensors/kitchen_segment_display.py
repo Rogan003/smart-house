@@ -32,7 +32,12 @@ def run_kitchen_segment_display_loop(settings, callback, stop_event):
 
     while not stop_event.is_set():
         current_time = time.time()
-        if current_time - last_decrement_time >= 1:
+        if kitchen_timer.is_blinking():
+            if int(current_time * 2) % 2 == 0: # Blinking every 500ms
+                timer_val = "0000"
+            else:
+                timer_val = "    "
+        elif current_time - last_decrement_time >= 1:
             timer_val = kitchen_timer.decrement()
             callback(settings, timer_val)
             last_decrement_time = current_time
