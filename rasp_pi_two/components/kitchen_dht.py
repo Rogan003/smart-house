@@ -61,8 +61,8 @@ def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLI
     }
 
     with counter_lock:
-        dht_batch.append(('Temperature Kitchen', json.dumps(temp_payload), 0, True))
         dht_batch.append(('Humidity Kitchen', json.dumps(humidity_payload), 0, True))
+        dht_batch.append(('Temperature Kitchen', json.dumps(temp_payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:
