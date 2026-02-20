@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const API_BASE = 'http://localhost:5000';
@@ -14,9 +14,34 @@ const COLORS = [
   { name: 'White', hex: '#ffffff', rgb: [255, 255, 255] },
 ];
 
-function RGBPanel() {
+function RGBPanel({ rgbState }) {
   const [isOn, setIsOn] = useState(false);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+
+  // Sync with global state from props
+  useEffect(() => {
+    if (rgbState) {
+      setIsOn(rgbState.on);
+      
+      // Find matching color in COLORS array by RGB values
+      const matchingColor = COLORS.find(c => 
+        c.rgb[0] === rgbState.color.r && 
+        c.rgb[1] === rgbState.color.g && 
+        c.rgb[2] === rgbState.color.b
+      );
+      
+      if (matchingColor) {
+        setSelectedColor(matchingColor);
+      } else {
+        // Fallback for custom colors if needed
+        setSelectedColor({
+          name: 'Custom',
+          hex: `rgb(${rgbState.color.r}, ${rgbState.color.g}, ${rgbState.color.b})`,
+          rgb: [rgbState.color.r, rgbState.color.g, rgbState.color.b]
+        });
+      }
+    }
+  }, [rgbState]);
 
   const handleToggle = async () => {
     console.log('handleToggle called, isOn:', isOn);

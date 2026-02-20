@@ -15,6 +15,7 @@ function App() {
   const [systemActive, setSystemActive] = useState(false);
   const [peopleCount, setPeopleCount] = useState(0);
   const [sensorData, setSensorData] = useState({});
+  const [rgbState, setRgbState] = useState({ on: false, color: { r: 255, g: 0, b: 0 } });
 
   // Fetch status periodically
   useEffect(() => {
@@ -26,6 +27,10 @@ function App() {
           setSystemActive(response.data.system_active || false);
           setPeopleCount(response.data.people_count || 0);
           setSensorData(response.data.sensors || {});
+          setRgbState({
+            on: response.data.rgb_on,
+            color: response.data.rgb_color
+          });
         }
       } catch (error) {
         console.error('Error fetching status:', error);
@@ -96,7 +101,7 @@ function App() {
             onDeactivateSystem={handleDeactivateSystem}
           />
           <TimerPanel />
-          <RGBPanel />
+          <RGBPanel rgbState={rgbState} />
         </section>
 
         <section className="panel-row">

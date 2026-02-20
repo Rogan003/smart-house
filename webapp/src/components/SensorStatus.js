@@ -48,6 +48,19 @@ function SensorStatus({ sensorData }) {
     }
     // Try to parse string as number and round it
     if (typeof value === 'string') {
+      // Check if it's an RGB string like "rgb(255,0,0)"
+      if (value.startsWith('rgb(')) {
+        return <span style={{ 
+          display: 'inline-block', 
+          width: '20px', 
+          height: '20px', 
+          backgroundColor: value,
+          borderRadius: '50%',
+          verticalAlign: 'middle',
+          border: '1px solid white'
+        }}></span>;
+      }
+
       const num = parseFloat(value);
       if (!isNaN(num) && value.match(/^-?\d+\.?\d*$/)) {
         return Math.round(num * 100) / 100;

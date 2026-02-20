@@ -192,7 +192,7 @@ def update_sensor_state(data):
 # ---- RULES ----
 def process_sensor_rules(data):
     """Main function to process all sensor rules"""
-    global alarm_state, system_active, people_count
+    global alarm_state, system_active, people_count, rgb_on, rgb_color
     
     name = data.get("name", "")
     value = data.get("value", "")
@@ -233,7 +233,37 @@ def process_sensor_rules(data):
         store_dht_value("DHT2", data)
     elif name == "DHT3":
         store_dht_value("DHT3", data)
-    
+
+    # RULE 9: Bedroom RGB status sync
+    if name == "BRGB":
+        with state_lock:
+            if value == "off":
+                rgb_on = False
+            else:
+                rgb_on = True
+                # value can be color name or "rgb(r,g,b)"
+                if value.startswith("rgb("):
+                    try:
+                        parts = value.replace("rgb(", "").replace(")", "").split(",")
+                        rgb_color["r"] = int(parts[0])
+                        rgb_color["g"] = int(parts[1])
+                        rgb_color["b"] = int(parts[2])
+                    except:
+                        pass
+                else:
+                    # Map common color names
+                    color_map = {
+                        "red": {"r": 255, "g": 0, "b": 0},
+                        "green": {"r": 0, "g": 255, "b": 0},
+                        "blue": {"r": 0, "g": 0, "b": 255},
+                        "yellow": {"r": 255, "g": 255, "b": 0},
+                        "purple": {"r": 255, "g": 0, "b": 255},
+                        "lightBlue": {"r": 173, "g": 216, "b": 230},
+                        "white": {"r": 255, "g": 255, "b": 255},
+                    }
+                    if value in color_map:
+                        rgb_color = color_map[value].copy()
+
     # store temperature/humidity from separate topics
     measurement = data.get("measurement", "")
     if "Temperature" in measurement:
