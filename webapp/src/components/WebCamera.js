@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 function WebCamera() {
-  const [cameraUrl, setCameraUrl] = useState('http://localhost:8081/stream');
+  const [cameraUrl, setCameraUrl] = useState('http://192.168.107.145:8080/?action=stream');
   const [isConnected, setIsConnected] = useState(true);
 
   const handleUrlChange = (e) => {
@@ -23,7 +23,7 @@ function WebCamera() {
           type="text"
           value={cameraUrl}
           onChange={handleUrlChange}
-          placeholder="http://raspberry-pi:8081/stream"
+          placeholder="http://192.168.107.145:8080/?action=stream"
         />
         <button className="btn btn-primary" onClick={handleRefresh}>
           🔄 Refresh
@@ -62,7 +62,7 @@ function WebCamera() {
         <p>ℹ️ To connect a web camera on Raspberry Pi:</p>
         <ol>
           <li>Start the stream on PI using mjpg-streamer</li>
-          <li>Enter the stream URL above (e.g., http://PI_IP:8081/stream)</li>
+          <li>Enter the stream URL above (e.g., http://192.168.107.145:8080/?action=stream)</li>
         </ol>
       </div>
     </div>

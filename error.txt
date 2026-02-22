@@ -1,9 +1,16 @@
 Enter command: /home/student/tamara/smart-house/sensors/door_led_light.py:22: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
   GPIO.setup(pin, GPIO.OUT)
 
-
-
   power ide na 5v
   GND na ground
 
   High/Low - 
+
+KAMERA:
+
+export http_proxy="http://proxy.uns.ac.rs:8080"
+export https_proxy="http://proxy.uns.ac.rs:8080"
+
+sudo apt install -y mjpg-streamer
+
+mjpg_streamer -i "input_uvc.so" -o "output_http.so -p 8080 -w /usr/local/share/mjpg-streamer/www"
