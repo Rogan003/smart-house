@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 from colors import print_blue
+from buzzer_controller import buzzer_controller
 
 def buzz(pin, callback, settings):
     print_blue("[Door 1] - Buzzer Buzzing")
@@ -20,7 +21,12 @@ def buzz(pin, callback, settings):
 def run_door_buzzer_one_loop(settings, callback, stop_event):
     pin = settings['pin']
     GPIO.setup(pin, GPIO.OUT)
-    buzz(pin, callback, settings)
-
-    if stop_event.is_set():
-        GPIO.cleanup()
+    
+    while not stop_event.is_set():
+        if buzzer_controller.is_active():
+            buzz(pin, callback, settings)
+            time.sleep(0.3)  # short pause between buzzes
+        else:
+            time.sleep(0.1)
+    
+    GPIO.cleanup()
