@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import MPU6050 
+from . import MPU6050
 import time
 import os
 

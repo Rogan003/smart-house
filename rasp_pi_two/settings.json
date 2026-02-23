@@ -39,7 +39,7 @@
     },
     "kitchen_gyroscope": {
         "simulated": true,
-        "pins": 18,
+        "pins": [],
         "runs_on": "PI2",
         "name": "GSG"
     }
