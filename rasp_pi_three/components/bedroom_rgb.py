@@ -18,14 +18,13 @@ live_queue = queue.Queue()
 
 
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
             publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
             live_queue.task_done()
         except Exception as e:
-            print(f"[BRGB] Live publish error: {e}")
+            print(f"[BRGB] error: {e}")
 
 live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
 live_publisher_thread.start()
@@ -49,7 +48,7 @@ publisher_thread.daemon = True
 publisher_thread.start()
 
 def get_color_for_value(color_str):
-    """Map color value to Colors constant based on button clicked"""
+    # map color string to Colors constant
     if color_str == "off":
         return Colors.GRAY
     elif "255,0,0" in color_str or color_str == "red":
@@ -88,10 +87,10 @@ def bedroom_rgb_callback(color, settings):
         "value": color
     }
 
-    # 1. Non-blocking /live publish (za reakciju servera)
+    # send to live topic
     live_queue.put(('Bedroom RGB/live', json.dumps(payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
+    # add to batch
     with counter_lock:
         rgb_batch.append(('Bedroom RGB/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1

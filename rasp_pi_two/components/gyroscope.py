@@ -19,14 +19,13 @@ live_queue = queue.Queue()
 
 
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
             publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
             live_queue.task_done()
         except Exception as e:
-            print(f"[GSG] Live publish error: {e}")
+            print(f"[GSG] error: {e}")
 
 live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
 live_publisher_thread.start()
@@ -62,7 +61,7 @@ def gyroscope_callback(accel, gyro, settings):
 
     axes = ['X', 'Y', 'Z']
     
-    # 1. Non-blocking /live publish (za reakciju servera)
+    # send to live topic
     for i, axis in enumerate(axes):
         accel_payload = {
             "measurement": f"Accelerometer {axis}",
@@ -83,7 +82,7 @@ def gyroscope_callback(accel, gyro, settings):
         }
         live_queue.put((f'Gyroscope {axis}/live', json.dumps(gyro_payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
+    # add to batch
     with counter_lock:
         for i, axis in enumerate(axes):
             accel_payload = {

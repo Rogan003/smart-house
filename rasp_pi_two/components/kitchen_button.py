@@ -15,12 +15,9 @@ publish_data_counter = 0
 publish_data_limit = 5
 counter_lock = threading.Lock()
 
-# Queue for non-blocking /live publishing
 live_queue = queue.Queue()
 
-
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
@@ -72,10 +69,8 @@ def kitchen_button_callback(settings):
         "value": "TRUE"
     }
 
-    # 1. Non-blocking /live publish (za reakciju servera)
     live_queue.put(('Kitchen Button/live', json.dumps(payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
     with counter_lock:
         button_batch.append(('Kitchen Button/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1
@@ -86,7 +81,7 @@ def kitchen_button_callback(settings):
 def run_kitchen_button(settings, threads, stop_event):
     if settings['simulated']:
         print_red("[Kitchen Button] Starting button simulator")
-        kitchen_button_thread = threading.Thread(target = run_kitchen_button_simulator, args=(settings, kitchen_button_callback))
+        kitchen_button_thread = threading.Thread(target=run_kitchen_button_simulator, args=(settings, kitchen_button_callback))
         kitchen_button_thread.start()
         threads.append(kitchen_button_thread)
     else:
@@ -95,3 +90,12 @@ def run_kitchen_button(settings, threads, stop_event):
         kitchen_button_thread = threading.Thread(target=run_kitchen_button_loop, args=(settings, kitchen_button_callback, stop_event))
         kitchen_button_thread.start()
         threads.append(kitchen_button_thread)
+
+def run_kitchen_button_continuous(settings, threads, stop_event):
+    if not settings['simulated']:
+        from sensors.kitchen_button import run_kitchen_button_loop
+        print_red("[BTN] Starting kitchen button continuous listener")
+        kitchen_button_thread = threading.Thread(target=run_kitchen_button_loop, args=(settings, kitchen_button_callback, stop_event))
+        kitchen_button_thread.start()
+        threads.append(kitchen_button_thread)
+        print_red("[BTN] Kitchen button listener started")

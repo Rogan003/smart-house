@@ -20,14 +20,13 @@ live_queue = queue.Queue()
 
 
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
             publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
             live_queue.task_done()
         except Exception as e:
-            print(f"[DS2] Live publish error: {e}")
+            print(f"[DS2] error: {e}")
 
 live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
 live_publisher_thread.start()
@@ -71,10 +70,10 @@ def door_button_two_callback(settings, value="TRUE"):
         "value": value
     }
 
-    # 1. Non-blocking /live publish (za reakciju servera)
+    # send to live topic
     live_queue.put(('Door Button 2/live', json.dumps(payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
+    # add to batch
     with counter_lock:
         button_batch.append(('Door Button 2/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1

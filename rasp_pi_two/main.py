@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt
 from components.door_button_two import run_door_button_two
 from components.door_motion_sensor_two import run_door_motion_sensor_two
 from components.door_ultrasonic_sensor_two import run_door_ultrasonic_sensor_two
-from components.kitchen_button import run_kitchen_button
+from components.kitchen_button import run_kitchen_button, run_kitchen_button_continuous
 from components.kitchen_dht import run_kitchen_dht
 from components.kitchen_segment_display import run_kitchen_segment_display
 from components.gyroscope import run_gyroscope
@@ -23,7 +23,6 @@ except:
     pass
 
 
-# MQTT subscriber for control messages
 def on_connect(client, userdata, flags, rc):
     print(f"[MQTT] Connected with result code {rc}")
     client.subscribe("Timer Display")
@@ -71,12 +70,13 @@ def menu(settings, threads, stop_event):
 
     while True:
         print("\n---- Menu ----")
-        print("1. click kitchen button")
+        if kitchen_button_settings['simulated']:
+            print("1. click kitchen button")
         print()
 
         user_input = input("Enter command: ")
 
-        if user_input == "1":
+        if user_input == "1" and kitchen_button_settings['simulated']:
             run_kitchen_button(kitchen_button_settings, threads, stop_event)
 
         else:
@@ -89,7 +89,6 @@ if __name__ == "__main__":
     threads = []
     stop_event = threading.Event()
 
-    # Start MQTT subscriber client for control messages
     mqtt_client = mqtt.Client()
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
@@ -115,6 +114,9 @@ if __name__ == "__main__":
 
         gyroscope_settings = settings['kitchen_gyroscope']
         run_gyroscope(gyroscope_settings, threads, stop_event)
+
+        kitchen_button_settings = settings['kitchen_button']
+        run_kitchen_button_continuous(kitchen_button_settings, threads, stop_event)
 
         menu(settings, threads, stop_event)
 

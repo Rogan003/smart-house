@@ -15,12 +15,9 @@ publish_data_counter = 0
 publish_data_limit = 5
 counter_lock = threading.Lock()
 
-# Queue for non-blocking /live publishing
 live_queue = queue.Queue()
 
-
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
@@ -66,10 +63,8 @@ def door_membrane_switch_callback(key, settings):
         "value": key
     }
 
-    # 1. Non-blocking /live publish (za reakciju servera)
     live_queue.put(('Door Membrane Switch/live', json.dumps(payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
     with counter_lock:
         membrane_batch.append(('Door Membrane Switch/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1
@@ -78,15 +73,25 @@ def door_membrane_switch_callback(key, settings):
         publish_event.set()
 
 
-def run_door_membrane_switch(settings, threads, stop_event, row, col):
+def run_door_membrane_switch(settings, threads, stop_event, row=None, col=None):
     if settings['simulated']:
-        print_green("[Door 1] Starting membrane switch simulator")
-        door_membrane_switch_thread = threading.Thread(target = run_door_membrane_switch_simulator, args=(0.2, door_membrane_switch_callback, stop_event, row, col, settings))
-        door_membrane_switch_thread.start()
-        threads.append(door_membrane_switch_thread)
+        if row is not None and col is not None:
+            print_green("[Door 1] Starting membrane switch simulator")
+            door_membrane_switch_thread = threading.Thread(target=run_door_membrane_switch_simulator, args=(0.2, door_membrane_switch_callback, stop_event, row, col, settings))
+            door_membrane_switch_thread.start()
+            threads.append(door_membrane_switch_thread)
     else:
         from sensors.door_membrane_switch import run_door_membrane_switch_loop
         print_green("[Door 1] Starting membrane switch loop")
         door_membrane_switch_thread = threading.Thread(target=run_door_membrane_switch_loop, args=(settings, door_membrane_switch_callback, stop_event))
         door_membrane_switch_thread.start()
         threads.append(door_membrane_switch_thread)
+
+def run_door_membrane_switch_continuous(settings, threads, stop_event):
+    if not settings['simulated']:
+        from sensors.door_membrane_switch import run_door_membrane_switch_loop
+        print_green("[DMS] Starting membrane switch continuous listener")
+        door_membrane_switch_thread = threading.Thread(target=run_door_membrane_switch_loop, args=(settings, door_membrane_switch_callback, stop_event))
+        door_membrane_switch_thread.start()
+        threads.append(door_membrane_switch_thread)
+        print_green("[DMS] Membrane switch listener started")

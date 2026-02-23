@@ -1,2 +1,2 @@
-HOSTNAME = "localhost" # change to ip addr of the device with server.py
+HOSTNAME = "localhost" # change to ip of server
 PORT = 1883

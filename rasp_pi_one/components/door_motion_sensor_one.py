@@ -20,14 +20,13 @@ live_queue = queue.Queue()
 
 
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
             publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
             live_queue.task_done()
         except Exception as e:
-            print(f"[DPIR1] Live publish error: {e}")
+            print(f"[DPIR1] error: {e}")
 
 live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
 live_publisher_thread.start()
@@ -67,10 +66,10 @@ def door_motion_sensor_one_callback(settings, status):
         "value": status
     }
 
-    # 1. Non-blocking /live publish (za reakciju servera)
+    # send to live topic
     live_queue.put(('Door Motion Sensor 1/live', json.dumps(payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
+    # add to batch
     with counter_lock:
         motion_batch.append(('Door Motion Sensor 1/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1

@@ -20,14 +20,13 @@ live_queue = queue.Queue()
 
 
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
             publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
             live_queue.task_done()
         except Exception as e:
-            print(f"[DB1] Live publish error: {e}")
+            print(f"[DB1] error: {e}")
 
 live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
 live_publisher_thread.start()
@@ -66,10 +65,10 @@ def door_buzzer_one_callback(settings):
         "value": "active"
     }
 
-    # 1. Non-blocking /live publish (za reakciju servera)
+    # send to live topic
     live_queue.put(('Door Buzzer 1/live', json.dumps(payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
+    # add to batch
     with counter_lock:
         buzzer_batch.append(('Door Buzzer 1/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1
@@ -93,7 +92,7 @@ def run_door_buzzer_one(settings, threads, stop_event):
 
 
 def run_door_buzzer_one_continuous(settings, threads, stop_event):
-    """Run buzzer in continuous mode that listens for MQTT control messages"""
+    # listens for mqtt
     if settings['simulated']:
         print_blue("[Door 1] Starting continuous buzzer simulator (MQTT controlled)")
         door_buzzer_one_thread = threading.Thread(target=run_door_buzzer_one_simulator_loop, args=(door_buzzer_one_callback, stop_event, settings))

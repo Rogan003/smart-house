@@ -18,14 +18,13 @@ live_queue = queue.Queue()
 
 
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
             publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
             live_queue.task_done()
         except Exception as e:
-            print(f"[DHT1] Live publish error: {e}")
+            print(f"[DHT1] error: {e}")
 
 live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
 live_publisher_thread.start()
@@ -77,11 +76,11 @@ def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLI
         "value": humidity
     }
 
-    # 1. Non-blocking /live publish (za reakciju servera)
+    # send to live topic
     live_queue.put(('Temperature Bedroom/live', json.dumps(temp_payload)))
     live_queue.put(('Humidity Bedroom/live', json.dumps(humidity_payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
+    # add to batch
     with counter_lock:
         dht_batch.append(('Humidity Bedroom/batch', json.dumps(humidity_payload), 0, True))
         dht_batch.append(('Temperature Bedroom/batch', json.dumps(temp_payload), 0, True))

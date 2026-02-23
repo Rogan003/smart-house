@@ -18,14 +18,13 @@ live_queue = queue.Queue()
 
 
 def live_publisher_task():
-    """Daemon thread for non-blocking /live message publishing"""
     while True:
         try:
             topic, payload = live_queue.get()
             publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
             live_queue.task_done()
         except Exception as e:
-            print(f"[4SD] Live publish error: {e}")
+            print(f"[4SD] error: {e}")
 
 live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
 live_publisher_thread.start()
@@ -66,10 +65,10 @@ def kitchen_segment_display_callback(settings, timer_val, verbose=True):
         "value": timer_val
     }
 
-    # 1. Non-blocking /live publish (za reakciju servera)
+    # send to live topic
     live_queue.put(('Kitchen Segment Display/live', json.dumps(payload)))
 
-    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
+    # add to batch
     with counter_lock:
         segment_batch.append(('Kitchen Segment Display/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1

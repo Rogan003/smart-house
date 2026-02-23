@@ -11,7 +11,7 @@ function TimerPanel() {
   const [timerDisplay, setTimerDisplay] = useState('00:00');
   const [isBlinking, setIsBlinking] = useState(false);
 
-  // Fetch timer status from server periodically
+  // get timer status from server
   useEffect(() => {
     const fetchTimerStatus = async () => {
       try {
@@ -19,7 +19,7 @@ function TimerPanel() {
         if (response.data) {
           const timerSeconds = response.data.timer_seconds || 0;
           const blinking = response.data.timer_blinking || false;
-          
+          // mins:secs format
           const mins = Math.floor(timerSeconds / 60);
           const secs = timerSeconds % 60;
           setTimerDisplay(`${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
@@ -31,7 +31,7 @@ function TimerPanel() {
     };
 
     fetchTimerStatus();
-    const interval = setInterval(fetchTimerStatus, 1000); // Update every second
+    const interval = setInterval(fetchTimerStatus, 1000); // update every second
     return () => clearInterval(interval);
   }, []);
 

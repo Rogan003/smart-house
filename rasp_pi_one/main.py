@@ -4,7 +4,7 @@ import paho.mqtt.client as mqtt
 
 from components.door_led_light import run_door_led_lights
 from components.door_buzzer_one import run_door_buzzer_one, run_door_buzzer_one_continuous
-from components.door_membrane_switch import run_door_membrane_switch
+from components.door_membrane_switch import run_door_membrane_switch, run_door_membrane_switch_continuous
 
 from components.door_button_one import run_door_button_one
 from components.door_motion_sensor_one import run_door_motion_sensor_one
@@ -23,7 +23,6 @@ except:
     pass
 
 
-# MQTT subscriber for control messages
 def on_connect(client, userdata, flags, rc):
     print(f"[MQTT] Connected with result code {rc}")
     client.subscribe("Buzzer Control")
@@ -58,7 +57,9 @@ def menu(settings, threads, stop_event):
         print("\n---- Menu ----")
         print("1. toggle door light")
         print("2. buzz")
-        print("3. keypad press\n")
+        if door_membrane_switch_settings['simulated']:
+            print("3. keypad press")
+        print()
 
         user_input = input("Enter command: ")
 
@@ -68,7 +69,7 @@ def menu(settings, threads, stop_event):
         elif user_input == "2":
             run_door_buzzer_one(door_buzzer_one_settings, threads, stop_event)
 
-        elif user_input == "3":
+        elif user_input == "3" and door_membrane_switch_settings['simulated']:
             try:
                 row = int(input("Enter Row (1-4): ")) - 1
                 col = int(input("Enter Column (1-4): ")) - 1
@@ -90,7 +91,6 @@ if __name__ == "__main__":
     threads = []
     stop_event = threading.Event()
 
-    # start MQTT subscriber client for control messages
     mqtt_client = mqtt.Client()
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
@@ -108,13 +108,14 @@ if __name__ == "__main__":
         door_ultrasonic_sensor_one_settings = settings['door_ultrasonic_sensor_one']
         run_door_ultrasonic_sensor_one(door_ultrasonic_sensor_one_settings, threads, stop_event)
 
-        # start DL1 LED light (listens for MQTT commands from server)
         door_led_light_settings = settings['door_led_light']
         run_door_led_lights(door_led_light_settings, threads, stop_event)
 
-        # start continuous buzzer that listens for MQTT control messages (alarm)
         door_buzzer_one_settings = settings['door_buzzer']
         run_door_buzzer_one_continuous(door_buzzer_one_settings, threads, stop_event)
+
+        door_membrane_switch_settings = settings['door_membrane_switch']
+        run_door_membrane_switch_continuous(door_membrane_switch_settings, threads, stop_event)
 
         menu(settings, threads, stop_event)
 

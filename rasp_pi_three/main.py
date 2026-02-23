@@ -23,7 +23,6 @@ except:
     pass
 
 
-# MQTT subscriber for control messages
 def on_connect(client, userdata, flags, rc):
     print(f"[MQTT] Connected with result code {rc}")
     client.subscribe("RGB Control")
@@ -71,12 +70,13 @@ def menu(settings, threads, stop_event):
     bedroom_ir_settings = settings['bedroom_infrared']
     while True:
         print("\n---- Menu ----")
-        print("1. Bedroom IR")
+        if bedroom_ir_settings['simulated']:
+            print("1. Bedroom IR")
         print()
 
         user_input = input("Enter command: ")
 
-        if user_input == "1":
+        if user_input == "1" and bedroom_ir_settings['simulated']:
             button = input("Enter button (0-7): ")
             run_bedroom_ir(bedroom_ir_settings, threads, stop_event, button)
         else:
@@ -89,7 +89,6 @@ if __name__ == "__main__":
     threads = []
     stop_event = threading.Event()
 
-    # Start MQTT subscriber client for control messages
     mqtt_client = mqtt.Client()
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
