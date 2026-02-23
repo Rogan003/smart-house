@@ -25,7 +25,9 @@
     },
     "bedroom_rgb": {
         "simulated": true,
-        "pin": 23,
+        "red_pin": 12,
+        "green_pin": 13,
+        "blue_pin": 19,
         "runs_on": "PI3",
         "name": "BRGB"
     },
