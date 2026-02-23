@@ -13,7 +13,7 @@ def get_distance(pin_trig, pin_echo):
     pulse_start_time = time.time()
     pulse_end_time = time.time()
 
-    max_iter = 100
+    max_iter = 1000
 
     iter = 0
     while GPIO.input(pin_echo) == 0:
