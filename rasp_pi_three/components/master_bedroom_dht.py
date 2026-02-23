@@ -51,6 +51,10 @@ publisher_thread.start()
 
 def dht_callback(humidity, temperature, publish_event, dht_settings, code="DHTLIB_OK", verbose=True):
     global publish_data_counter, publish_data_limit
+
+    if code != "DHTLIB_OK":
+        return
+
     dht_storage.update_dht2(temperature, humidity)
 
     if verbose:
