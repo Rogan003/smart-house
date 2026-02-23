@@ -1,7 +1,8 @@
-from colors import print_blue
+from colors import Colors, print_blue, print_separator, print_gray
 import threading
 import time
 import json
+import queue
 import paho.mqtt.publish as publish
 
 from simulators.kitchen_segment_display import run_kitchen_segment_display_simulator
@@ -11,6 +12,24 @@ segment_batch = []
 publish_data_counter = 0
 publish_data_limit = 5
 counter_lock = threading.Lock()
+
+# Queue for non-blocking /live publishing
+live_queue = queue.Queue()
+
+
+def live_publisher_task():
+    """Daemon thread for non-blocking /live message publishing"""
+    while True:
+        try:
+            topic, payload = live_queue.get()
+            publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
+            live_queue.task_done()
+        except Exception as e:
+            print(f"[4SD] Live publish error: {e}")
+
+live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
+live_publisher_thread.start()
+
 
 def publisher_task(event, segment_batch):
     global publish_data_counter
@@ -29,13 +48,15 @@ publisher_thread = threading.Thread(target=publisher_task, args=(publish_event, 
 publisher_thread.daemon = True
 publisher_thread.start()
 
-def kitchen_segment_display_callback(settings, timer_val):
+def kitchen_segment_display_callback(settings, timer_val, verbose=True):
     global publish_data_counter, publish_data_limit
 
-    t = time.localtime()
-    print_blue("\n" + "="*20)
-    print_blue(f"[4SD] Display: {timer_val} (Kitchen Segment Display)")
-    print_blue(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+    if verbose:
+        t = time.localtime()
+        timestamp = time.strftime('%H:%M:%S', t)
+        print()
+        print(f"{Colors.BLUE}🔢 [4SD] {timer_val}{Colors.RESET}  {Colors.GRAY}[{timestamp}]{Colors.RESET}")
+        print_separator()
 
     payload = {
         "measurement": "Kitchen Segment Display",
@@ -45,8 +66,12 @@ def kitchen_segment_display_callback(settings, timer_val):
         "value": timer_val
     }
 
+    # 1. Non-blocking /live publish (za reakciju servera)
+    live_queue.put(('Kitchen Segment Display/live', json.dumps(payload)))
+
+    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
     with counter_lock:
-        segment_batch.append(('Kitchen Segment Display', json.dumps(payload), 0, True))
+        segment_batch.append(('Kitchen Segment Display/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

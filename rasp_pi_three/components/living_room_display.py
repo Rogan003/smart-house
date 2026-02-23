@@ -1,7 +1,8 @@
-from colors import print_blue
+from colors import Colors, print_blue, print_separator
 import threading
 import time
 import json
+import queue
 import paho.mqtt.publish as publish
 
 from simulators.living_room_display import run_living_room_display_simulator
@@ -11,6 +12,24 @@ lcd_batch = []
 publish_data_counter = 0
 publish_data_limit = 5
 counter_lock = threading.Lock()
+
+# Queue for non-blocking /live publishing
+live_queue = queue.Queue()
+
+
+def live_publisher_task():
+    """Daemon thread for non-blocking /live message publishing"""
+    while True:
+        try:
+            topic, payload = live_queue.get()
+            publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
+            live_queue.task_done()
+        except Exception as e:
+            print(f"[LCD] Live publish error: {e}")
+
+live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
+live_publisher_thread.start()
+
 
 def publisher_task(event, lcd_batch):
     global publish_data_counter
@@ -33,9 +52,10 @@ def living_room_display_callback(line1, line2, settings):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_blue("\n" + "="*20)
-    print_blue(f"[LCD] Display:\n{line1}\n{line2}")
-    print_blue(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+    timestamp = time.strftime('%H:%M:%S', t)
+    print()
+    print(f"{Colors.BLUE}📺 [LCD] {line1} | {line2}{Colors.RESET}  {Colors.GRAY}[{timestamp}]{Colors.RESET}")
+    print_separator()
 
     payload = {
         "measurement": "Living Room Display",
@@ -45,8 +65,12 @@ def living_room_display_callback(line1, line2, settings):
         "value": f"{line1} | {line2}"
     }
 
+    # 1. Non-blocking /live publish (za reakciju servera)
+    live_queue.put(('Living Room Display/live', json.dumps(payload)))
+
+    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
     with counter_lock:
-        lcd_batch.append(('Living Room Display', json.dumps(payload), 0, True))
+        lcd_batch.append(('Living Room Display/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

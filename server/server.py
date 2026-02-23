@@ -7,7 +7,44 @@ import json
 import threading
 import time
 from datetime import datetime
+import logging
 
+# ---- COLORS FOR TERMINAL OUTPUT ----
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    GRAY = '\033[90m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+
+def print_color(color, message):
+    print(f"{color}{message}{Colors.ENDC}")
+
+def print_gray(message):
+    print_color(Colors.GRAY, message)
+
+def print_green(message):
+    print_color(Colors.GREEN, message)
+
+def print_yellow(message):
+    print_color(Colors.YELLOW, message)
+
+def print_red(message):
+    print_color(Colors.RED, message)
+
+def print_cyan(message):
+    print_color(Colors.CYAN, message)
+
+def print_blue(message):
+    print_color(Colors.BLUE, message)
+
+# Suppress Flask/Werkzeug HTTP request logs
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 CORS(app, origins="*", allow_headers=["Content-Type", "Authorization", "X-Requested-With"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
@@ -24,17 +61,19 @@ influxdb_client = InfluxDBClient(url=url, token=token, org=org)
 # ---- GLOBAL STATES ----
 alarm_state = False
 system_active = True  # security system is ON at start
-people_count = 0
-timer_seconds = 0
+people_count = 1  # Initial value: assume 1-2 people inside to prevent immediate alarm on motion detection
+empty_house_acknowledged = False  # Flag to track if empty house state was acknowledged (alarm triggers on NEXT motion, not immediately)
+timer_seconds = 30  # Initial timer value (same as PI2's kitchen_timer)
 timer_add_seconds = 10
 timer_blinking = False
+timer_just_set = False  # Flag to skip first countdown after timer is set/modified
 rgb_on = False
 rgb_color = {"r": 255, "g": 0, "b": 0}
 sensor_data = {}
 state_lock = threading.Lock()
 
 # security PIN code
-CORRECT_PIN = "2110"
+CORRECT_PIN = "11"
 entered_pin = ""
 system_activation_timer = None
 
@@ -65,8 +104,8 @@ dht_values = {
 # ---- MQTT CONFIGURATION ----
 mqtt_client = mqtt.Client()
 
-# list of all topics to subscribe to
-MQTT_TOPICS = [
+# base topics (without /live or /batch suffix)
+MQTT_BASE_TOPICS = [
     "Door Button 1",
     "Door Buzzer 1",
     "Door LED 1",
@@ -97,9 +136,14 @@ MQTT_TOPICS = [
     "DMS PIN Entry",
 ]
 
+# Generate /live and /batch topics from base topics
+MQTT_LIVE_TOPICS = [f"{topic}/live" for topic in MQTT_BASE_TOPICS]
+MQTT_BATCH_TOPICS = [f"{topic}/batch" for topic in MQTT_BASE_TOPICS]
+MQTT_TOPICS = MQTT_BASE_TOPICS + MQTT_LIVE_TOPICS + MQTT_BATCH_TOPICS
+
 def clear_retained_messages():
     """Clear all retained messages from MQTT broker on server start"""
-    print("Clearing retained MQTT messages...")
+    print_gray("Clearing retained MQTT messages...")
     clear_client = mqtt.Client()
     clear_client.connect("localhost", 1883, 60)
     
@@ -111,13 +155,14 @@ def clear_retained_messages():
     clear_client.publish("LED Control", payload="", retain=True)
     
     clear_client.disconnect()
-    print("Retained messages cleared.")
+    print_gray("Retained messages cleared.")
 
 def on_connect(client, userdata, flags, rc):
-    print(f"Connected to MQTT broker with result code {rc}")
+    print_green(f"\n✅ Connected to MQTT broker (rc={rc})")
     # subscribe to all topics
     for topic in MQTT_TOPICS:
         client.subscribe(topic)
+    print_gray(f"Subscribed to {len(MQTT_TOPICS)} topics")
 
 def on_message(client, userdata, msg):
     # ignore empty messages (from clearing retained messages)
@@ -127,15 +172,26 @@ def on_message(client, userdata, msg):
         data = json.loads(msg.payload.decode('utf-8'))
         name = data.get("name", "")
         value = data.get("value", "")
-        # Debug print for DS1 and DPIR1
-        if name in ["DS1", "DPIR1"]:
-            print(f"[SERVER] Received: {name} = {value}")
-        save_to_db(data)
-        update_sensor_state(data)
-        # process rules based on sensor data
-        process_sensor_rules(data)
+        topic = msg.topic
+        
+        is_live = topic.endswith('/live')
+        is_batch = topic.endswith('/batch')
+        
+        if is_live:
+            # /live messages: react IMMEDIATELY - for rules, update statuses
+            update_sensor_state(data)
+            process_sensor_rules(data)
+        elif is_batch:
+            # /batch messages: just save to InfluxDB
+            save_to_db(data)
+        else:
+            # base topic (old format): do both
+            save_to_db(data)
+            update_sensor_state(data)
+            process_sensor_rules(data)
+            
     except Exception as e:
-        print(f"Error processing message: {e}")
+        print_red(f"[ERROR] Processing message: {e}")
 
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
@@ -146,39 +202,83 @@ clear_retained_messages()
 mqtt_client.connect("localhost", 1883, 60)
 mqtt_client.loop_start()
 
-print("🔒 SECURITY SYSTEM: ON (default at startup)")
+print_green("\n" + "="*60)
+print_green("🏠 SMART HOUSE SERVER STARTED")
+print_green("🔒 Security System: ON (default)")
+print_green(f"👥 Initial People Count: {people_count}")
+print_green("="*60 + "\n")
 
 
 # ---- DB FUNCTIONS ----
 def save_to_db(data):
     try:
         write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
+        value = data.get("value", "")
+        
         point = (
             Point(data["measurement"])
             .tag("simulated", str(data.get("simulated", True)))
             .tag("runs_on", data.get("runs_on", ""))
             .tag("name", data.get("name", ""))
-            .field("measurement", data.get("value", ""))
         )
+        
+        # Store numeric values as floats (for mean/sum aggregations)
+        # Store string values as strings (use last() aggregation)
+        try:
+            numeric_value = float(value)
+            point = point.field("value", numeric_value)
+        except (ValueError, TypeError):
+            # String value - store as string field
+            # Also store a numeric representation for graphing (1=active/true, 0=inactive/false)
+            point = point.field("value_str", str(value))
+            
+            # Special handling for timer display values (MM:SS format)
+            if ":" in str(value) and data.get("measurement") == "Kitchen Segment Display":
+                try:
+                    parts = str(value).split(":")
+                    if len(parts) == 2:
+                        mins = int(parts[0])
+                        secs = int(parts[1])
+                        total_seconds = mins * 60 + secs
+                        point = point.field("value", float(total_seconds))
+                    else:
+                        point = point.field("value", 0.0)
+                except (ValueError, IndexError):
+                    point = point.field("value", 0.0)
+            elif str(value).upper() in ["TRUE", "1", "DETECTED", "ACTIVE", "ON", "OPEN"]:
+                point = point.field("value", 1.0)
+            elif str(value).upper() in ["FALSE", "0", "NOT DETECTED", "INACTIVE", "OFF", "CLOSED"]:
+                point = point.field("value", 0.0)
+            else:
+                # For other strings (like colors, PIN digits), just store string
+                point = point.field("value", 0.0)
+        
         write_api.write(bucket=bucket, org=org, record=point)
     except Exception as e:
-        print(f"Error saving to DB: {e}")
+        print_red(f"[DB ERROR] {e}")
 
-def save_alarm_event(event_type, reason):
-    """Save alarm events (entry/exit) to DB"""
+def save_alarm_event(status, reason):
+    """Save alarm event to InfluxDB for Grafana dashboard"""
     try:
         write_api = influxdb_client.write_api(write_options=SYNCHRONOUS)
+        
+        # Map status to numeric value for graphing
+        status_value = 1.0 if status == "ACTIVATED" else 0.0
+        
         point = (
             Point("Alarm Event")
-                .tag("event_type", event_type)
-                .tag("reason", reason)
-                .field("timestamp", datetime.now().isoformat())
-                .field("event", event_type)
+            .tag("simulated", "False")
+            .tag("runs_on", "SERVER")
+            .tag("name", "ALARM")
+            .tag("status", status)
+            .field("value", status_value)
+            .field("reason", reason)
         )
+        
         write_api.write(bucket=bucket, org=org, record=point)
-        print(f"ALARM EVENT: {event_type} - {reason}")
+        print_gray(f"[DB] Alarm event saved: {status}")
     except Exception as e:
-        print(f"Error saving alarm event: {e}")
+        print_red(f"[DB ERROR] Alarm event: {e}")
 
 def update_sensor_state(data):
     global sensor_data
@@ -220,6 +320,7 @@ def process_sensor_rules(data):
     
     # RULE 6: motion sensors (DPIR1, DPIR2, DPIR3) - ALARM if people_count == 0
     if name in ["DPIR1", "DPIR2", "DPIR3"] and value == "detected":
+        print_cyan(f"\n🚶 [MOTION] {name} detected movement!")
         check_motion_with_no_people(name)
     
     # RULE 7: DMS PIN entry
@@ -233,6 +334,10 @@ def process_sensor_rules(data):
         store_dht_value("DHT2", data)
     elif name == "DHT3":
         store_dht_value("DHT3", data)
+
+    # RULE 10: Kitchen Button - add N seconds to timer
+    if name == "BTN" or "Kitchen Button" in data.get("measurement", ""):
+        add_seconds_to_timer_from_button()
 
     # RULE 9: Bedroom RGB status sync
     if name == "BRGB":
@@ -258,7 +363,7 @@ def process_sensor_rules(data):
                         "blue": {"r": 0, "g": 0, "b": 255},
                         "yellow": {"r": 255, "g": 255, "b": 0},
                         "purple": {"r": 255, "g": 0, "b": 255},
-                        "lightBlue": {"r": 173, "g": 216, "b": 230},
+                        "cyan": {"r": 0, "g": 255, "b": 255},
                         "white": {"r": 255, "g": 255, "b": 255},
                     }
                     if value in color_map:
@@ -286,39 +391,56 @@ def check_door_open_alarm(door_name, value):
     """RULE: If DS1 or DS2 is open for more than 5 seconds, trigger ALARM"""
     global alarm_state, door_open_time
     
-    print(f"[RULE] check_door_open_alarm: {door_name} = {value}")
+    should_deactivate = False
+    
+    # Normalize value to check for door open/closed
+    is_door_open = str(value).upper() in ["TRUE", "1", "OPEN"]
     
     with state_lock:
-        if value == "TRUE" or value == "1" or value == True:
-            # door is open
-            if door_open_time[door_name] is None:
-                door_open_time[door_name] = time.time()
-                print(f"[RULE] {door_name} opened - starting 5 second timer")
-                # start a timer to check after 5 seconds
-                threading.Timer(5.1, check_door_timer, args=[door_name]).start()
+        if is_door_open:
+            # door is open - only start timer if system is active
+            if door_open_time[door_name] is None and system_active:
+                open_time = time.time()
+                door_open_time[door_name] = open_time
+                print_yellow(f"\n🚪 [DOOR] {door_name} OPENED - starting 5s alarm timer")
+                # start a timer to check after 5 seconds, pass the open_time to verify it hasn't changed
+                threading.Timer(5.1, check_door_timer, args=[door_name, open_time]).start()
+            elif not system_active:
+                print_gray(f"[DOOR] {door_name} opened (system OFF - no timer)")
         else:
-            # door is closed
-            print(f"[RULE] {door_name} closed - canceling alarm timer")
+            # door is closed - cancel timer and turn off alarm
+            if door_open_time[door_name] is not None:
+                print_green(f"\n🔒 [DOOR] {door_name} CLOSED - timer canceled")
             door_open_time[door_name] = None
-            # if alarm was triggered by this door, turn it off
+            # if alarm is active, turn it off when door closes
             if alarm_state:
-                print(f"{door_name} closed - checking if alarm should turn off")
+                should_deactivate = True
+    
+    # Deactivate alarm OUTSIDE the lock to prevent deadlock
+    if should_deactivate:
+        deactivate_alarm(f"{door_name} closed")
 
-def check_door_timer(door_name):
+def check_door_timer(door_name, original_open_time):
     """Check if door is still open after 5 seconds"""
     global alarm_state, door_open_time, system_active
     
     should_trigger = False
     trigger_reason = ""
     with state_lock:
-        if door_open_time[door_name] is not None:
-            elapsed = time.time() - door_open_time[door_name]
+        current_open_time = door_open_time[door_name]
+        
+        # Only trigger if the door is STILL open from the SAME open event
+        # If door was closed and reopened, current_open_time will be different
+        if current_open_time is not None and current_open_time == original_open_time:
+            elapsed = time.time() - current_open_time
             if elapsed >= 5:
                 if not alarm_state and system_active:
                     should_trigger = True
                     trigger_reason = f"{door_name} open for more than 5 seconds"
                 elif not system_active:
-                    print(f"[RULE] {door_name} open > 5s but system is OFF - no alarm")
+                    print_gray(f"[DOOR] {door_name} open > 5s but system OFF - no alarm")
+        else:
+            print_gray(f"[DOOR] {door_name} timer expired but door was closed - no alarm")
     
     if should_trigger:
         trigger_alarm(trigger_reason)
@@ -328,7 +450,7 @@ def turn_on_dl1_for_10_seconds():
     """RULE: When DPIR1 detects motion, turn on DL1 for 10 seconds"""
     global dl1_timer
     
-    print("DPIR1 detected motion - turning on DL1 for 10 seconds")
+    print_cyan("💡 [LED] DL1 ON for 10 seconds (motion detected)")
     # send MQTT command to turn on DL1
     mqtt_client.publish("LED Control", json.dumps({"command": "ON", "target": "DL1"}))
     
@@ -341,7 +463,7 @@ def turn_on_dl1_for_10_seconds():
     dl1_timer.start()
 
 def turn_off_dl1():
-    print("Turning off DL1")
+    print_gray("[LED] DL1 OFF (timer expired)")
     mqtt_client.publish("LED Control", json.dumps({"command": "OFF", "target": "DL1"}))
 
 def store_distance_history(sensor_name, value):
@@ -362,48 +484,60 @@ def store_distance_history(sensor_name, value):
             # keep only last N readings
             if len(distance_history[sensor_name]) > DISTANCE_HISTORY_LIMIT:
                 distance_history[sensor_name] = distance_history[sensor_name][-DISTANCE_HISTORY_LIMIT:]
+            history_count = len(distance_history[sensor_name])
+        
+        # Only print occasionally to reduce noise (every 5th reading)
+        if history_count <= 2 or history_count % 5 == 0:
+            print_gray(f"📏 [DISTANCE] {sensor_name}: {distance:.1f}cm")
     except ValueError:
-        print("Invalid distance value - store_distance_history()")
+        print_gray(f"[DISTANCE] Invalid distance value for {sensor_name}: {value}")
 
 
 def check_entry_exit(dus_sensor, dpir_sensor):
-    """RULE: Determine if person is entering or exiting based on distance history"""
-    global people_count
+    """RULE: Determine if person is entering or exiting based on last 2 distance readings"""
+    global people_count, empty_house_acknowledged
     
     action = None  # "entered", "exited", or None
     current_count = 0
+    prev_dist = 0
+    curr_dist = 0
     
     with state_lock:
         history = distance_history.get(dus_sensor, [])
-        if len(history) < 3:
-            print("Not enough data - check_entry_exit()")
+        if len(history) < 2:
+            print_gray(f"[ENTRY/EXIT] {dus_sensor}: Not enough data ({len(history)}/2)")
             return  # not enough data
         
-        # get recent readings (last 3 seconds)
-        recent_time = time.time() - 3
-        recent_readings = [r for r in history if r["time"] > recent_time]
+        # Use only the LAST 2 readings for cleaner direction detection
+        prev_reading = history[-2]["distance"]  # second to last
+        curr_reading = history[-1]["distance"]  # most recent
+        prev_dist = prev_reading
+        curr_dist = curr_reading
         
-        if len(recent_readings) < 2:
-            print("Recent readins < 2 - check_entry_exit()")
-            return
-        
-        # calculate if distance is decreasing (entering) or increasing (exiting)
-        first_reading = recent_readings[0]["distance"]
-        last_reading = recent_readings[-1]["distance"]
-        
-        if first_reading > last_reading and first_reading - last_reading > 20:
-            # dist decreasing = person entering
+        # Simple direction detection:
+        # - If current < previous: person is APPROACHING sensor = ENTERING
+        # - If current > previous: person is MOVING AWAY from sensor = EXITING
+        if curr_reading < prev_reading:
+            # Distance decreased = person approaching = entering
             people_count += 1
             current_count = people_count
             action = "entered"
-        elif last_reading > first_reading and last_reading - first_reading > 20:
-            # dist increasing = person exiting
+            # Reset empty house flag when someone enters
+            empty_house_acknowledged = False
+        elif curr_reading > prev_reading:
+            # Distance increased = person moving away = exiting
             people_count = max(0, people_count - 1)
             current_count = people_count
             action = "exited"
+            # If house is now empty, set the acknowledged flag
+            # This means alarm will trigger on NEXT motion, not this one
+            if people_count == 0:
+                empty_house_acknowledged = True
+                print_yellow(f"         ⚠️ House is now EMPTY - alarm will trigger on next motion")
     
     if action == "entered":
-        print(f"Person ENTERED via {dpir_sensor}. People count: {current_count}")
+        print_green(f"\n🚶➡️🏠 [ENTRY] Person ENTERED via {dpir_sensor}/{dus_sensor}")
+        print_green(f"         {prev_dist:.1f}cm → {curr_dist:.1f}cm | 👥 People: {current_count}")
         save_to_db({
             "measurement": "People Count",
             "simulated": False,
@@ -412,7 +546,8 @@ def check_entry_exit(dus_sensor, dpir_sensor):
             "value": current_count
         })
     elif action == "exited":
-        print(f"Person EXITED via {dpir_sensor}. People count: {current_count}")
+        print_yellow(f"\n🏠➡️🚶 [EXIT] Person EXITED via {dpir_sensor}/{dus_sensor}")
+        print_yellow(f"         {prev_dist:.1f}cm → {curr_dist:.1f}cm | 👥 People: {current_count}")
         save_to_db({
             "measurement": "People Count",
             "simulated": False,
@@ -455,28 +590,55 @@ def check_gyroscope_alarm(data):
             if deviation > GYROSCOPE_THRESHOLD:
                 if not alarm_state and system_active:
                     should_trigger = True
-                    trigger_reason = f"Significant gyroscope movement detected on {axis}-axis (deviation: {deviation:.2f})"
+                    trigger_reason = f"Gyroscope movement on {axis}-axis (deviation: {deviation:.1f})"
                 elif not system_active:
-                    print(f"[RULE] Gyroscope movement detected but system is OFF - no alarm")
+                    print_gray(f"[GYRO] Movement detected but system OFF")
         
         if should_trigger:
             trigger_alarm(trigger_reason)
     except ValueError:
-        print("ValueError - check_gyroscope_alarm()")
+        pass
 
 
 def check_motion_with_no_people(sensor_name):
-    """RULE: If people_count == 0 and motion detected, trigger ALARM"""
-    global alarm_state, people_count, system_active
+    """RULE: If people_count == 0 and motion detected (after house became empty), trigger ALARM"""
+    global alarm_state, people_count, system_active, empty_house_acknowledged
     
     should_trigger = False
     trigger_reason = ""
+    current_people = 0
+    current_alarm = False
+    current_system = False
+    is_acknowledged = False
     
     with state_lock:
-        if people_count == 0 and system_active:
-            if not alarm_state:
+        current_people = people_count
+        current_alarm = alarm_state
+        current_system = system_active
+        is_acknowledged = empty_house_acknowledged
+        
+        # Only trigger alarm if:
+        # 1. people_count == 0
+        # 2. system is active
+        # 3. alarm is not already active
+        # 4. empty_house_acknowledged is True (meaning house was already empty BEFORE this motion)
+        if people_count == 0 and system_active and not alarm_state:
+            if empty_house_acknowledged:
                 should_trigger = True
-                trigger_reason = f"Motion detected by {sensor_name} with no people inside"
+                trigger_reason = f"Motion detected by {sensor_name} with no people inside (RULE 6)"
+    
+    # Print people count status
+    print_gray(f"         👥 People count: {current_people}")
+    
+    # Show why alarm is not triggered (for debugging)
+    if current_people == 0 and current_system and current_alarm:
+        print_gray(f"         ⚠️ (Alarm already active - not re-triggering)")
+    elif current_people == 0 and current_system and not is_acknowledged:
+        print_gray(f"         ⏳ (House just became empty - waiting for next motion to trigger alarm)")
+    elif current_people > 0:
+        print_gray(f"         ✅ (People inside - no alarm needed)")
+    elif not current_system:
+        print_gray(f"         🔓 (System OFF - no alarm)")
     
     # Call trigger_alarm OUTSIDE the lock to prevent nested lock deadlock
     if should_trigger:
@@ -490,17 +652,17 @@ def process_dms_input(value):
     if value == "*":
         # clear entered PIN
         entered_pin = ""
-        print("DMS: PIN cleared")
+        print_gray("[DMS] PIN cleared")
     elif value == "#":
-        # submit PIN
+        # submit PIN manually
         check_pin()
     elif len(value) == 1 and value.isdigit():
         # add digit to PIN
         entered_pin += value
-        print(f"DMS: PIN entry: {'*' * len(entered_pin)}")
+        print_cyan(f"🔢 [DMS] PIN entry: {entered_pin} ({'*' * len(entered_pin)})")
         
-        # auto-submit on 4 digits
-        if len(entered_pin) >= 4:
+        # auto-submit when PIN length matches expected PIN length
+        if len(entered_pin) >= len(CORRECT_PIN):
             check_pin()
 
 def check_pin():
@@ -511,8 +673,6 @@ def check_pin():
     
     with state_lock:
         if entered_pin == CORRECT_PIN:
-            print("DMS: Correct PIN entered!")
-            
             if alarm_state:
                 # turn off ALARM
                 alarm_state = False
@@ -535,12 +695,12 @@ def check_pin():
     if action == "deactivate_alarm":
         save_alarm_event("DEACTIVATED", "Correct PIN entered")
         mqtt_client.publish("Buzzer Control", json.dumps({"command": "OFF"}))
-        print("ALARM deactivated by PIN")
+        print_green("\n✅ [DMS] Correct PIN - ALARM deactivated")
     elif action == "activate_system":
-        print("System will activate in 10 seconds...")
+        print_cyan("\n⏳ [DMS] Correct PIN - System activating in 10 seconds...")
         mqtt_client.publish("DMS Feedback", json.dumps({"message": "System activating in 10 seconds"}))
     elif action == "incorrect":
-        print("DMS: Incorrect PIN!")
+        print_red("\n❌ [DMS] Incorrect PIN!")
         mqtt_client.publish("DMS Feedback", json.dumps({"message": "Incorrect PIN"}))
 
 
@@ -550,7 +710,7 @@ def activate_security_system():
     
     with state_lock:
         system_active = True
-    print("-- SECURITY SYSTEM ACTIVATED!")
+    print_green("\n🔒 [SYSTEM] SECURITY SYSTEM ACTIVATED!")
     mqtt_client.publish("DMS Feedback", json.dumps({"message": "System ACTIVE"}))
     save_alarm_event("SYSTEM_ACTIVATED", "PIN entered - system activated after 10 seconds")
 
@@ -565,10 +725,68 @@ def trigger_alarm(reason):
             should_trigger = True
     
     if should_trigger:
-        print(f"!!! ALARM TRIGGERED: {reason} !!!")
+        print_red(f"\n{'='*60}")
+        print_red(f"🚨🚨🚨 ALARM TRIGGERED 🚨🚨🚨")
+        print_red(f"Reason: {reason}")
+        print_red(f"{'='*60}")
         save_alarm_event("ACTIVATED", reason)
         # turn on buzzer
         mqtt_client.publish("Buzzer Control", json.dumps({"command": "ON"}))
+
+
+def deactivate_alarm(reason):
+    """Deactivate the ALARM state"""
+    global alarm_state
+    
+    should_deactivate = False
+    with state_lock:
+        if alarm_state:
+            alarm_state = False
+            should_deactivate = True
+    
+    if should_deactivate:
+        print_green(f"\n{'='*60}")
+        print_green(f"🔕 ALARM DEACTIVATED")
+        print_green(f"Reason: {reason}")
+        print_green(f"{'='*60}")
+        save_alarm_event("DEACTIVATED", reason)
+        # turn off buzzer
+        mqtt_client.publish("Buzzer Control", json.dumps({"command": "OFF"}))
+
+
+def add_seconds_to_timer_from_button():
+    """Handle BTN press: add seconds if timer active, stop blinking if timer finished"""
+    global timer_seconds, timer_blinking, timer_just_set
+    
+    action = None  # "add_time" or "stop_blinking"
+    current_seconds = 0
+    add_amount = 0
+    
+    with state_lock:
+        if timer_blinking:
+            # Timer finished and blinking - just stop the blinking, don't add time
+            timer_blinking = False
+            action = "stop_blinking"
+        elif timer_seconds > 0:
+            # Timer is active - add configured seconds
+            timer_seconds += timer_add_seconds
+            timer_just_set = True
+            current_seconds = timer_seconds
+            add_amount = timer_add_seconds
+            action = "add_time"
+        # If timer_seconds == 0 and not blinking, button press does nothing
+    
+    if action == "stop_blinking":
+        mqtt_client.publish("Timer Display", json.dumps({"command": "STOP_BLINK"}))
+        print_cyan(f"🔘 [BTN] Kitchen Button pressed - stopped blinking")
+    elif action == "add_time":
+        minutes = current_seconds // 60
+        seconds = current_seconds % 60
+        mqtt_client.publish("Timer Display", json.dumps({
+            "command": "SET",
+            "value": f"{minutes:02d}:{seconds:02d}"
+        }))
+        print_cyan(f"🔘 [BTN] Kitchen Button pressed - added {add_amount}s → {minutes:02d}:{seconds:02d}")
 
 
 def store_dht_value(dht_name, data):
@@ -611,20 +829,47 @@ def lcd_rotation_task():
         
         time.sleep(5)  # rotate every 5 seconds
 
+def print_rainbow(message):
+    """Print message with 3 alternating colors"""
+    colors = [Colors.RED, Colors.YELLOW, Colors.CYAN]
+    result = ""
+    for i, char in enumerate(message):
+        result += colors[i % len(colors)] + char
+    print(result + Colors.ENDC)
+
+def print_separator():
+    print_gray("-" * 60)
+
+def print_with_timestamp(color, text):
+    """Print colored text with gray timestamp"""
+    import time
+    t = time.localtime()
+    timestamp = time.strftime('%H:%M:%S', t)
+    print()
+    print(f"{color}{text}{Colors.ENDC}  {Colors.GRAY}[{timestamp}]{Colors.ENDC}")
+    print_separator()
+
 def timer_countdown_task():
-    """Background task to handle kitchen timer countdown"""
-    global timer_seconds, timer_blinking
+    """Background task to handle kitchen timer countdown - SERVER is the single source of truth"""
+    global timer_seconds, timer_blinking, timer_just_set
+    
+    blink_announced = False
     
     while True:
         try:
-            # capture state under lock, then release before MQTT calls to prevent deadlock
             should_publish_update = False
             should_publish_blink = False
             display_value = None
+            current_seconds = 0
             
             with state_lock:
-                if timer_seconds > 0 and not timer_blinking:
+                # Skip decrement if timer was just set/modified (prevents losing 1 second)
+                if timer_just_set:
+                    timer_just_set = False
+                    current_seconds = timer_seconds
+                elif timer_seconds > 0 and not timer_blinking:
                     timer_seconds -= 1
+                    current_seconds = timer_seconds
                     
                     # prepare update for 4SD display
                     minutes = timer_seconds // 60
@@ -635,8 +880,14 @@ def timer_countdown_task():
                     if timer_seconds == 0:
                         timer_blinking = True
                         should_publish_blink = True
+                elif timer_blinking:
+                    current_seconds = 0
             
-            # publish MQTT messages OUTSIDE the lock to prevent deadlock
+            # Print only last 5 seconds
+            if should_publish_update and current_seconds <= 5 and current_seconds > 0:
+                print_cyan(f"⏱️ [TIMER] {display_value}")
+            
+            # publish MQTT messages to PI2's 4SD display
             if should_publish_update:
                 mqtt_client.publish("Timer Display", json.dumps({
                     "command": "SET",
@@ -644,14 +895,42 @@ def timer_countdown_task():
                 }))
             
             if should_publish_blink:
+                print_rainbow("🎉🎉🎉 [TIMER] FINISHED - 4SD BLINKING! 🎉🎉🎉")
+                blink_announced = True
                 mqtt_client.publish("Timer Display", json.dumps({
                     "command": "BLINK",
                     "value": "00:00"
                 }))
+            
+            # Reset blink announced when timer restarted
+            if not timer_blinking:
+                blink_announced = False
+                
         except Exception as e:
             print(f"Timer countdown error: {e}")
         
         time.sleep(1)
+
+def status_display_task():
+    """Background task to periodically display system status"""
+    global people_count, alarm_state, system_active
+    
+    while True:
+        try:
+            time.sleep(30)  # every 30 seconds
+            with state_lock:
+                current_people = people_count
+                current_alarm = alarm_state
+                current_system = system_active
+            
+            status_emoji = "🚨" if current_alarm else "✅"
+            system_emoji = "🔒" if current_system else "🔓"
+            print_blue(f"\n{'─'*40}")
+            print_blue(f"📊 [STATUS] {status_emoji} Alarm: {'ACTIVE' if current_alarm else 'OFF'} | {system_emoji} System: {'ON' if current_system else 'OFF'} | 👥 People: {current_people}")
+            print_blue(f"{'─'*40}")
+        except Exception as e:
+            pass
+        
 
 # start background tasks
 lcd_thread = threading.Thread(target=lcd_rotation_task, daemon=True)
@@ -659,6 +938,9 @@ lcd_thread.start()
 
 timer_thread = threading.Thread(target=timer_countdown_task, daemon=True)
 timer_thread.start()
+
+status_thread = threading.Thread(target=status_display_task, daemon=True)
+status_thread.start()
 
 
 # ---- API ROUTES ----
@@ -714,7 +996,7 @@ def get_status():
 
 # ---- ALARM ENDPOINTS ----
 @app.route('/alarm/deactivate', methods=['POST'])
-def deactivate_alarm():
+def api_deactivate_alarm():
     global alarm_state, system_active
     with state_lock:
         alarm_state = False
@@ -754,12 +1036,13 @@ def deactivate_system():
 # ---- TIMER ENDPOINTS ----
 @app.route('/timer/set', methods=['POST'])
 def set_timer():
-    global timer_seconds, timer_blinking
+    global timer_seconds, timer_blinking, timer_just_set
     data = request.get_json()
     
     with state_lock:
         timer_seconds = data.get("seconds", 0)
         timer_blinking = False
+        timer_just_set = True  # Skip next countdown decrement
         current_timer_seconds = timer_seconds
     
     # publish to MQTT for 4SD display (outside lock to prevent deadlock)
@@ -787,7 +1070,7 @@ def configure_timer():
 @app.route('/timer/add', methods=['POST'])
 def add_timer_seconds():
     """Add N seconds to timer (simulates BTN press)"""
-    global timer_seconds, timer_blinking
+    global timer_seconds, timer_blinking, timer_just_set
     
     was_blinking = False
     current_timer_seconds = 0
@@ -797,6 +1080,7 @@ def add_timer_seconds():
             timer_blinking = False
             was_blinking = True
         timer_seconds += timer_add_seconds
+        timer_just_set = True  # Skip next countdown decrement
         current_timer_seconds = timer_seconds
     
     if was_blinking:
@@ -896,6 +1180,79 @@ def get_alarm_events():
     |> sort(columns: ["_time"], desc: true)
     |> limit(n: 50)"""
     return handle_influx_query(query)
+
+
+# ---- DATA MANAGEMENT ENDPOINTS ----
+@app.route('/data/delete/<pi_name>', methods=['DELETE'])
+def delete_pi_data(pi_name):
+    """Delete all InfluxDB data for a specific PI (PI1, PI2, PI3)"""
+    try:
+        delete_api = influxdb_client.delete_api()
+        
+        # Delete data where runs_on tag matches the PI name
+        start = "1970-01-01T00:00:00Z"
+        stop = datetime.utcnow().isoformat() + "Z"
+        
+        delete_api.delete(
+            start=start,
+            stop=stop,
+            predicate=f'runs_on="{pi_name}"',
+            bucket=bucket,
+            org=org
+        )
+        
+        print(f"🗑️ Deleted all data for {pi_name}")
+        return jsonify({"status": "success", "message": f"Deleted all data for {pi_name}"})
+    except Exception as e:
+        print(f"Error deleting data for {pi_name}: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/data/delete/all', methods=['DELETE'])
+def delete_all_data():
+    """Delete all InfluxDB data"""
+    try:
+        delete_api = influxdb_client.delete_api()
+        
+        start = "1970-01-01T00:00:00Z"
+        stop = datetime.utcnow().isoformat() + "Z"
+        
+        # Delete all data from bucket
+        delete_api.delete(
+            start=start,
+            stop=stop,
+            predicate='_measurement != ""',
+            bucket=bucket,
+            org=org
+        )
+        
+        print("🗑️ Deleted ALL InfluxDB data")
+        return jsonify({"status": "success", "message": "Deleted all data"})
+    except Exception as e:
+        print(f"Error deleting all data: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/data/delete/server', methods=['DELETE'])
+def delete_server_data():
+    """Delete all server-generated data (alarm events, people count)"""
+    try:
+        delete_api = influxdb_client.delete_api()
+        
+        start = "1970-01-01T00:00:00Z"
+        stop = datetime.utcnow().isoformat() + "Z"
+        
+        delete_api.delete(
+            start=start,
+            stop=stop,
+            predicate='runs_on="SERVER"',
+            bucket=bucket,
+            org=org
+        )
+        
+        print("🗑️ Deleted all SERVER data")
+        return jsonify({"status": "success", "message": "Deleted server data"})
+    except Exception as e:
+        print(f"Error deleting server data: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 if __name__ == '__main__':

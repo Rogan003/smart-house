@@ -1,7 +1,8 @@
-from colors import print_white
+from colors import Colors, print_white, print_separator
 import threading
 import time
 import json
+import queue
 import paho.mqtt.publish as publish
 
 from simulators.bedroom_ir import run_bedroom_ir_simulator
@@ -12,6 +13,24 @@ ir_batch = []
 publish_data_counter = 0
 publish_data_limit = 5
 counter_lock = threading.Lock()
+
+# Queue for non-blocking /live publishing
+live_queue = queue.Queue()
+
+
+def live_publisher_task():
+    """Daemon thread for non-blocking /live message publishing"""
+    while True:
+        try:
+            topic, payload = live_queue.get()
+            publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
+            live_queue.task_done()
+        except Exception as e:
+            print(f"[IR] Live publish error: {e}")
+
+live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
+live_publisher_thread.start()
+
 
 def publisher_task(event, ir_batch):
     global publish_data_counter
@@ -34,9 +53,10 @@ def bedroom_ir_callback(button, settings):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_white("\n" + "="*20)
-    print_white(f"[IR] Button {button} pressed (Bedroom IR Receiver)")
-    print_white(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+    timestamp = time.strftime('%H:%M:%S', t)
+    print()
+    print(f"{Colors.WHITE}📡 [IR] Button {button} pressed{Colors.RESET}  {Colors.GRAY}[{timestamp}]{Colors.RESET}")
+    print_separator()
 
     # Control RGB
     if button == "1":
@@ -50,7 +70,7 @@ def bedroom_ir_callback(button, settings):
     elif button == "5":
         rgb_controller.set_color("purple")
     elif button == "6":
-        rgb_controller.set_color("lightBlue")
+        rgb_controller.set_color("cyan")
     elif button == "7":
         rgb_controller.set_color("white")
     elif button == "0":
@@ -64,8 +84,12 @@ def bedroom_ir_callback(button, settings):
         "value": button
     }
 
+    # 1. Non-blocking /live publish (za reakciju servera)
+    live_queue.put(('Bedroom IR/live', json.dumps(payload)))
+
+    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
     with counter_lock:
-        ir_batch.append(('Bedroom IR', json.dumps(payload), 0, True))
+        ir_batch.append(('Bedroom IR/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

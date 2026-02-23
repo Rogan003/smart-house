@@ -106,7 +106,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door button 1\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door button 1\")",
           "refId": "A"
         }
       ],
@@ -197,7 +197,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Buzzer 1\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door Buzzer 1\")",
           "refId": "A"
         }
       ],
@@ -288,7 +288,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door LED 1\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door LED 1\")",
           "refId": "A"
         }
       ],
@@ -379,7 +379,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Membrane Switch\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door Membrane Switch\")",
           "refId": "A"
         }
       ],
@@ -470,7 +470,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Motion Sensor 1\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door Motion Sensor 1\")",
           "refId": "A"
         }
       ],
@@ -561,7 +561,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Distance Sensor 1\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door Distance Sensor 1\")",
           "refId": "A"
         }
       ],
@@ -652,7 +652,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door button 2\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door button 2\")",
           "refId": "A"
         }
       ],
@@ -743,7 +743,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Kitchen Button\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Kitchen Button\")",
           "refId": "A"
         }
       ],
@@ -834,7 +834,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Motion Sensor 2\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door Motion Sensor 2\")",
           "refId": "A"
         }
       ],
@@ -925,7 +925,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Door Distance Sensor 2\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Door Distance Sensor 2\")",
           "refId": "A"
         }
       ],
@@ -1016,7 +1016,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Temperature Kitchen\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Temperature Kitchen\")",
           "refId": "A"
         },
         {
@@ -1024,7 +1024,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Humidity Kitchen\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Humidity Kitchen\")",
           "refId": "B"
         }
       ],
@@ -1115,7 +1115,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Kitchen Segment Display\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Kitchen Segment Display\")",
           "refId": "A"
         }
       ],
@@ -1206,7 +1206,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Accelerometer X\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Accelerometer X\")",
           "refId": "A"
         },
         {
@@ -1214,7 +1214,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Accelerometer Y\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Accelerometer Y\")",
           "refId": "B"
         },
         {
@@ -1222,7 +1222,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Accelerometer Z\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Accelerometer Z\")",
           "refId": "C"
         },
         {
@@ -1230,7 +1230,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Gyroscope X\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Gyroscope X\")",
           "refId": "D"
         },
         {
@@ -1238,7 +1238,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Gyroscope Y\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Gyroscope Y\")",
           "refId": "E"
         },
         {
@@ -1246,7 +1246,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Gyroscope Z\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Gyroscope Z\")",
           "refId": "F"
         }
       ],
@@ -1337,7 +1337,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Temperature Bedroom\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Temperature Bedroom\")",
           "refId": "A"
         },
         {
@@ -1345,7 +1345,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Humidity Bedroom\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Humidity Bedroom\")",
           "refId": "B"
         }
       ],
@@ -1436,7 +1436,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Temperature Master Bedroom\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Temperature Master Bedroom\")",
           "refId": "A"
         },
         {
@@ -1444,7 +1444,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Humidity Master Bedroom\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Humidity Master Bedroom\")",
           "refId": "B"
         }
       ],
@@ -1535,7 +1535,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Living Room Motion Sensor\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Living Room Motion Sensor\")",
           "refId": "A"
         }
       ],
@@ -1626,7 +1626,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Living Room Display\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Living Room Display\")",
           "refId": "A"
         }
       ],
@@ -1717,7 +1717,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Bedroom RGB\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Bedroom RGB\")",
           "refId": "A"
         }
       ],
@@ -1808,7 +1808,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"Bedroom IR\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"Bedroom IR\")",
           "refId": "A"
         }
       ],
@@ -1823,7 +1823,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
@@ -1832,15 +1832,24 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "_time"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Time"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -1851,7 +1860,10 @@
       "id": 20,
       "options": {
         "showHeader": true,
-        "sortBy": []
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
       },
       "targets": [
         {
@@ -1859,7 +1871,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -24h)\n|> filter(fn: (r) => r._measurement == \"Alarm Event\")\n|> sort(columns: [\"_time\"], desc: true)\n|> limit(n: 50)",
+          "query": "from(bucket: \"iot\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"Alarm Event\") |> filter(fn: (r) => r._field == \"reason\") |> map(fn: (r) => ({_time: r._time, \"Event Type\": r.status, \"Reason\": r._value})) |> group() |> sort(columns: [\"_time\"], desc: true) |> limit(n: 50)",
           "refId": "A"
         }
       ],
@@ -1950,7 +1962,7 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"iot\")\n|> range(start: -10m)\n|> filter(fn: (r) => r._measurement == \"People Count\")",
+          "query": "from(bucket: \"iot\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._field == \"value\" and r._measurement == \"People Count\")",
           "refId": "A"
         }
       ],
@@ -1966,7 +1978,7 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},

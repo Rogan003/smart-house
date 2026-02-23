@@ -35,7 +35,6 @@ def on_message(client, userdata, msg):
     try:
         topic = msg.topic
         payload = json.loads(msg.payload.decode())
-        print(f"[MQTT] Received on {topic}: {payload}")
 
         if topic == "Timer Display":
             command = payload.get("command")
@@ -48,10 +47,11 @@ def on_message(client, userdata, msg):
                     seconds = int(parts[1])
                     total_seconds = minutes * 60 + seconds
                     kitchen_timer.set_time(total_seconds)
-                    print(f"[Timer] Set to {total_seconds} seconds")
+                    # Only print for last 5 seconds (silent otherwise)
+                    # Printing is handled by the 4SD simulator
             elif command == "BLINK":
                 kitchen_timer.set_blinking(True)
-                print("[Timer] Blinking started")
+                # Rainbow print is handled by 4SD simulator
             elif command == "STOP_BLINK":
                 kitchen_timer.set_blinking(False)
                 print("[Timer] Blinking stopped")
@@ -61,7 +61,7 @@ def on_message(client, userdata, msg):
             if command == "CONFIGURE":
                 add_seconds = payload.get("add_seconds", 10)
                 kitchen_timer.n = add_seconds
-                print(f"[Timer] Configured add_seconds to {add_seconds}")
+                print(f"[Timer] Configured BTN to add {add_seconds} seconds")
 
     except Exception as e:
         print(f"[MQTT] Error processing message: {e}")
@@ -72,6 +72,7 @@ def menu(settings, threads, stop_event):
     while True:
         print("\n---- Menu ----")
         print("1. click kitchen button")
+        print()
 
         user_input = input("Enter command: ")
 
@@ -79,8 +80,7 @@ def menu(settings, threads, stop_event):
             run_kitchen_button(kitchen_button_settings, threads, stop_event)
 
         else:
-            print("Oops, invalid command!\n")
-        print()
+            print("Oops, invalid command!")
 
 
 if __name__ == "__main__":

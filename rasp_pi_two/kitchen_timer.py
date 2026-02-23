@@ -37,4 +37,4 @@ class KitchenTimer:
         with self.lock:
             return self.blinking
 
-kitchen_timer = KitchenTimer(n=10)
+kitchen_timer = KitchenTimer(n=10)  # n = seconds to add when BTN pressed (configurable via web)

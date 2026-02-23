@@ -18,7 +18,7 @@ def run_door_button_one_simulator(delay, settings, callback, stop_event):
                 callback(settings, "TRUE")
                 
                 # wait random time (2-10 seconds) before closing
-                close_delay = random.uniform(2, 10)
+                close_delay = random.uniform(1, 16)
                 time.sleep(close_delay)
                 
                 if stop_event.is_set():

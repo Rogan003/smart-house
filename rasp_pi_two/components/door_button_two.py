@@ -1,8 +1,9 @@
-from colors import print_gray, print_white
+from colors import Colors, print_gray, print_white, print_separator
 
 import threading
 import time
 import json
+import queue
 import paho.mqtt.publish as publish
 
 from simulators.door_button_two import run_door_button_two_simulator
@@ -13,6 +14,23 @@ button_batch = []
 publish_data_counter = 0
 publish_data_limit = 5
 counter_lock = threading.Lock()
+
+# Queue for non-blocking /live publishing
+live_queue = queue.Queue()
+
+
+def live_publisher_task():
+    """Daemon thread for non-blocking /live message publishing"""
+    while True:
+        try:
+            topic, payload = live_queue.get()
+            publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
+            live_queue.task_done()
+        except Exception as e:
+            print(f"[DS2] Live publish error: {e}")
+
+live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
+live_publisher_thread.start()
 
 
 def publisher_task(event, button_batch):
@@ -33,23 +51,32 @@ publisher_thread = threading.Thread(target=publisher_task, args=(publish_event, 
 publisher_thread.daemon = True
 publisher_thread.start()
 
-def door_button_two_callback(settings):
+def door_button_two_callback(settings, value="TRUE"):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_gray("\n" + "="*20)
-    print_gray(f"Timestamp: {time.strftime('%H:%M:%S', t)}")
+    timestamp = time.strftime('%H:%M:%S', t)
+    status = "OPEN" if value == "TRUE" else "CLOSED"
+    emoji = "🚪" if value == "TRUE" else "🔒"
+    color = Colors.CYAN if value == "TRUE" else Colors.GREEN
+    print()
+    print(f"{color}{emoji} [DS2] {status}{Colors.RESET}  {Colors.GRAY}[{timestamp}]{Colors.RESET}")
+    print_separator()
 
-    button_press_payload = {
+    payload = {
         "measurement": "Door button 2",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
         "name": settings["name"],
-        "value": "TRUE"
+        "value": value
     }
 
+    # 1. Non-blocking /live publish (za reakciju servera)
+    live_queue.put(('Door Button 2/live', json.dumps(payload)))
+
+    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
     with counter_lock:
-        button_batch.append(('Door Button 2', json.dumps(button_press_payload), 0, True))
+        button_batch.append(('Door Button 2/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

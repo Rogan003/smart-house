@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+
+const API_BASE = 'http://localhost:5000';
 
 function GrafanaPanel() {
   const [activeTab, setActiveTab] = useState('PI1');
+  const [deleteLoading, setDeleteLoading] = useState(null);
+  const [deleteMessage, setDeleteMessage] = useState(null);
 
   const pi1Panels = [
     { name: 'Door Button 1', panelId: 'panel-1' },
@@ -38,6 +43,96 @@ function GrafanaPanel() {
 
   const getIframeSrc = (panelId) => {
     return `http://localhost:3000/d-solo/iot-app-dashboard/iot-app-dashboard?orgId=1&refresh=5s&panelId=${panelId}&__feature.dashboardSceneSolo=true`;
+  };
+
+  const handleDelete = async (target) => {
+    const targetLabel = target === 'all' ? 'ALL' : target;
+    if (!window.confirm(`Are you sure you want to delete ${targetLabel} data? This cannot be undone!`)) {
+      return;
+    }
+
+    setDeleteLoading(target);
+    setDeleteMessage(null);
+
+    try {
+      let url;
+      if (target === 'all') {
+        url = `${API_BASE}/data/delete/all`;
+      } else if (target === 'server') {
+        url = `${API_BASE}/data/delete/server`;
+      } else {
+        url = `${API_BASE}/data/delete/${target}`;
+      }
+
+      const response = await axios.delete(url);
+      setDeleteMessage({ type: 'success', text: response.data.message });
+      
+      // Force refresh iframes
+      setTimeout(() => {
+        const iframes = document.querySelectorAll('.grafana-panel-item iframe');
+        iframes.forEach(iframe => {
+          iframe.src = iframe.src;
+        });
+      }, 500);
+    } catch (error) {
+      setDeleteMessage({ type: 'error', text: error.response?.data?.message || 'Error deleting data' });
+    } finally {
+      setDeleteLoading(null);
+      // Clear message after 3 seconds
+      setTimeout(() => setDeleteMessage(null), 3000);
+    }
+  };
+
+  const renderDeleteButtons = (piName) => {
+    return (
+      <div className="tab-delete-buttons">
+        <button 
+          className={`tab-delete-btn ${piName.toLowerCase()}`}
+          onClick={() => handleDelete(piName)}
+          disabled={deleteLoading !== null}
+        >
+          {deleteLoading === piName ? '⏳...' : `🗑️ Delete ${piName} Data`}
+        </button>
+        <button 
+          className="tab-delete-btn all"
+          onClick={() => handleDelete('all')}
+          disabled={deleteLoading !== null}
+        >
+          {deleteLoading === 'all' ? '⏳...' : '⚠️ Delete ALL Data'}
+        </button>
+        {deleteMessage && (
+          <span className={`delete-message ${deleteMessage.type}`}>
+            {deleteMessage.type === 'success' ? '✅' : '❌'} {deleteMessage.text}
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  const renderSystemDeleteButtons = () => {
+    return (
+      <div className="tab-delete-buttons">
+        <button 
+          className="tab-delete-btn server"
+          onClick={() => handleDelete('server')}
+          disabled={deleteLoading !== null}
+        >
+          {deleteLoading === 'server' ? '⏳...' : '🖥️ Delete Server Data'}
+        </button>
+        <button 
+          className="tab-delete-btn all"
+          onClick={() => handleDelete('all')}
+          disabled={deleteLoading !== null}
+        >
+          {deleteLoading === 'all' ? '⏳...' : '⚠️ Delete ALL Data'}
+        </button>
+        {deleteMessage && (
+          <span className={`delete-message ${deleteMessage.type}`}>
+            {deleteMessage.type === 'success' ? '✅' : '❌'} {deleteMessage.text}
+          </span>
+        )}
+      </div>
+    );
   };
 
   const renderPanels = (panels) => {
@@ -91,25 +186,37 @@ function GrafanaPanel() {
       <div className="grafana-content">
         {activeTab === 'PI1' && (
           <div>
-            <h3>PI1 - Front Door (6 components)</h3>
+            <div className="tab-header">
+              <h3>PI1 - Front Door (6 components)</h3>
+              {renderDeleteButtons('PI1')}
+            </div>
             {renderPanels(pi1Panels)}
           </div>
         )}
         {activeTab === 'PI2' && (
           <div>
-            <h3>PI2 - Kitchen + Second Door (7 components)</h3>
+            <div className="tab-header">
+              <h3>PI2 - Kitchen + Second Door (7 components)</h3>
+              {renderDeleteButtons('PI2')}
+            </div>
             {renderPanels(pi2Panels)}
           </div>
         )}
         {activeTab === 'PI3' && (
           <div>
-            <h3>PI3 - Bedrooms + Living Room (6 components)</h3>
+            <div className="tab-header">
+              <h3>PI3 - Bedrooms + Living Room (6 components)</h3>
+              {renderDeleteButtons('PI3')}
+            </div>
             {renderPanels(pi3Panels)}
           </div>
         )}
         {activeTab === 'SYSTEM' && (
           <div>
-            <h3>🚨 System Events & Statistics (2 panels)</h3>
+            <div className="tab-header">
+              <h3>🚨 System Events & Statistics (2 panels)</h3>
+              {renderSystemDeleteButtons()}
+            </div>
             {renderPanels(systemPanels)}
           </div>
         )}

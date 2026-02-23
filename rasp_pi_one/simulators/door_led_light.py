@@ -33,16 +33,12 @@ def on_message(client, userdata, msg):
         if target == "DL1":
             if command == "ON" and not led_state:
                 turn_diode_on()
-                print("\n💡 [DL1] LED turned ON (Door Light 1)")
-                print("------------------------------------------------------------")
-                # publish state change
+                # publish state change (callback will print the message)
                 if userdata and 'callback' in userdata:
                     userdata['callback'](userdata['settings'], "ON")
             elif command == "OFF" and led_state:
                 turn_diode_off()
-                print("\n💡 [DL1] LED turned OFF (Door Light 1)")
-                print("------------------------------------------------------------")
-                # publish state change
+                # publish state change (callback will print the message)
                 if userdata and 'callback' in userdata:
                     userdata['callback'](userdata['settings'], "OFF")
     except Exception as e:

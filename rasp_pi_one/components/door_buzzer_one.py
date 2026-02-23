@@ -3,6 +3,7 @@ from colors import print_white, print_blue, Colors, print_with_timestamp
 import threading
 import time
 import json
+import queue
 import paho.mqtt.publish as publish
 
 from simulators.door_buzzer_one import run_door_buzzer_one_simulator, run_door_buzzer_one_simulator_loop
@@ -11,8 +12,25 @@ from broker_settings import HOSTNAME, PORT
 
 buzzer_batch = []
 publish_data_counter = 0
-publish_data_limit = 1
+publish_data_limit = 5
 counter_lock = threading.Lock()
+
+# Queue for non-blocking /live publishing
+live_queue = queue.Queue()
+
+
+def live_publisher_task():
+    """Daemon thread for non-blocking /live message publishing"""
+    while True:
+        try:
+            topic, payload = live_queue.get()
+            publish.single(topic, payload, hostname=HOSTNAME, port=PORT)
+            live_queue.task_done()
+        except Exception as e:
+            print(f"[DB1] Live publish error: {e}")
+
+live_publisher_thread = threading.Thread(target=live_publisher_task, daemon=True)
+live_publisher_thread.start()
 
 
 def publisher_task(event, buzzer_batch):
@@ -24,7 +42,7 @@ def publisher_task(event, buzzer_batch):
             publish_data_counter = 0
             buzzer_batch.clear()
         publish.multiple(local_buzzer_batch, hostname=HOSTNAME, port=PORT)
-        print(f'published {publish_data_limit} buzzer values')
+        print(f'[DB1] Published {len(local_buzzer_batch)} buzzer values (batch)')
         event.clear()
 
 
@@ -38,9 +56,9 @@ def door_buzzer_one_callback(settings):
     global publish_data_counter, publish_data_limit
 
     t = time.localtime()
-    print_with_timestamp(Colors.BLUE, f"[DB1] active (Door Buzzer 1)", time.strftime('%H:%M:%S', t))
+    print_with_timestamp(Colors.BLUE, f"🔔 [DB1] active (Door Buzzer 1)", time.strftime('%H:%M:%S', t))
 
-    buzzer_payload = {
+    payload = {
         "measurement": "Door Buzzer 1",
         "simulated": settings['simulated'],
         "runs_on": settings["runs_on"],
@@ -48,8 +66,12 @@ def door_buzzer_one_callback(settings):
         "value": "active"
     }
 
+    # 1. Non-blocking /live publish (za reakciju servera)
+    live_queue.put(('Door Buzzer 1/live', json.dumps(payload)))
+
+    # 2. Dodaj u batch (za InfluxDB) - šalje daemon nit
     with counter_lock:
-        buzzer_batch.append(('Door Buzzer 1', json.dumps(buzzer_payload), 0, True))
+        buzzer_batch.append(('Door Buzzer 1/batch', json.dumps(payload), 0, True))
         publish_data_counter += 1
 
     if publish_data_counter >= publish_data_limit:

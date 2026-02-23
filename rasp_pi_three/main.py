@@ -72,6 +72,7 @@ def menu(settings, threads, stop_event):
     while True:
         print("\n---- Menu ----")
         print("1. Bedroom IR")
+        print()
 
         user_input = input("Enter command: ")
 
@@ -79,8 +80,7 @@ def menu(settings, threads, stop_event):
             button = input("Enter button (0-7): ")
             run_bedroom_ir(bedroom_ir_settings, threads, stop_event, button)
         else:
-            print("Oops, invalid command!\n")
-        print()
+            print("Oops, invalid command!")
 
 
 if __name__ == "__main__":

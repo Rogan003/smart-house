@@ -27,4 +27,4 @@ def run_living_room_display_simulator(callback, stop_event, settings):
             line2 = f"DHT3 Hum: {hum}%"
 
         callback(line1, line2, settings)
-        time.sleep(1)
+        time.sleep(4)

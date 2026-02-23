@@ -532,3 +532,210 @@ body {
   border-radius: 3px;
   font-size: 0.8rem;
 }
+
+/* Data Management Panel Styles */
+.data-management-panel {
+  width: 100%;
+}
+
+.delete-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+/* Tab Header with Delete Buttons */
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.tab-header h3 {
+  margin: 0;
+}
+
+.tab-delete-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tab-delete-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.tab-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tab-delete-btn.pi1 {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+}
+
+.tab-delete-btn.pi1:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+}
+
+.tab-delete-btn.pi2 {
+  background: linear-gradient(135deg, #27ae60, #1e8449);
+  color: white;
+}
+
+.tab-delete-btn.pi2:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1e8449, #196f3d);
+}
+
+.tab-delete-btn.pi3 {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.tab-delete-btn.pi3:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2980b9, #21618c);
+}
+
+.tab-delete-btn.server {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  color: white;
+}
+
+.tab-delete-btn.server:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8e44ad, #7d3c98);
+}
+
+.tab-delete-btn.all {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  color: white;
+}
+
+.tab-delete-btn.all:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d35400, #ba4a00);
+}
+
+.delete-message {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.delete-message.success {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.delete-message.error {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+}
+
+.delete-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.delete-label {
+  font-weight: bold;
+  min-width: 120px;
+}
+
+.delete-btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.delete-btn.pi1 {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.delete-btn.pi1:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+}
+
+.delete-btn.pi2 {
+  background: linear-gradient(135deg, #27ae60, #1e8449);
+}
+
+.delete-btn.pi2:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1e8449, #196f3d);
+  transform: translateY(-2px);
+}
+
+.delete-btn.pi3 {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.delete-btn.pi3:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2980b9, #1f618d);
+  transform: translateY(-2px);
+}
+
+.delete-btn.server {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.delete-btn.server:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8e44ad, #7d3c98);
+  transform: translateY(-2px);
+}
+
+.delete-btn.all {
+  background: linear-gradient(135deg, #e67e22, #d35400);
+}
+
+.delete-btn.all:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d35400, #ba4a00);
+  transform: translateY(-2px);
+}
+
+.data-management-panel .message {
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin: 10px 0;
+  font-weight: 500;
+}
+
+.data-management-panel .message.success {
+  background: rgba(46, 204, 113, 0.2);
+  border: 1px solid #2ecc71;
+  color: #2ecc71;
+}
+
+.data-management-panel .message.error {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+}
+
+.data-management-panel .info-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 15px;
+}
