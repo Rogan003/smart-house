@@ -31,7 +31,7 @@
     },
     "living_room_display": {
         "simulated": true,
-        "pins": 18,
+        "pins": [],
         "runs_on": "PI3",
         "name": "LCD"
     }
