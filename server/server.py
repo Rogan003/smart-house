@@ -290,13 +290,19 @@ def process_sensor_rules(data):
         check_door_open_alarm(name, value)
     
     # RULE 2: motion sensor (DPIR1) - turn on DL1 for 10 seconds
-    if name == "DPIR1" and value == "detected":
-        turn_on_dl1_for_10_seconds()
-        check_entry_exit("DUS1", "DPIR1")
+    if name == "DPIR1":
+        if value == "detected":
+            turn_on_dl1_for_10_seconds()
+            check_entry_exit("DUS1", "DPIR1")
+        elif value == "none":
+            print_gray(f"🚶 [MOTION] {name} motion stopped")
     
     # RULE 3: motion sensor (DPIR2) - check entry/exit
-    if name == "DPIR2" and value == "detected":
-        check_entry_exit("DUS2", "DPIR2")
+    if name == "DPIR2":
+        if value == "detected":
+            check_entry_exit("DUS2", "DPIR2")
+        elif value == "none":
+            print_gray(f"🚶 [MOTION] {name} motion stopped")
     
     # RULE 4: distance sensor (DUS1, DUS2) - store history for entry/exit
     if name in ["DUS1", "DUS2"]:
@@ -307,10 +313,13 @@ def process_sensor_rules(data):
         check_gyroscope_alarm(data)
     
     # RULE 6: motion sensors (DPIR1, DPIR2, DPIR3) - ALARM if people_count == 0
-    if name in ["DPIR1", "DPIR2", "DPIR3"] and value == "detected":
-        print_cyan(f"\n🚶 [MOTION] {name} detected movement!")
-        check_motion_with_no_people(name)
-    
+    if name in ["DPIR1", "DPIR2", "DPIR3"]:
+        if value == "detected":
+            print_cyan(f"\n🚶 [MOTION] {name} detected movement!")
+            check_motion_with_no_people(name)
+        elif value == "none":
+            print_gray(f"🚶 [MOTION] {name} motion stopped")
+        
     # RULE 7: DMS PIN entry
     if name == "DMS" or "Membrane" in data.get("measurement", ""):
         process_dms_input(value)

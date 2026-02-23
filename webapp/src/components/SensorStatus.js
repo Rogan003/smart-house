@@ -65,10 +65,6 @@ function SensorStatus({ sensorData }) {
       if (!isNaN(num) && value.match(/^-?\d+\.?\d*$/)) {
         return Math.round(num * 100) / 100;
       }
-      // Truncate long strings
-      if (value.length > 15) {
-        return value.substring(0, 15) + '...';
-      }
     }
     return value;
   };
